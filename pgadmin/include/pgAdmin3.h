@@ -77,8 +77,10 @@ const wxString GP_MAX_VERSION_T = wxT("8.3");
 #define creat _creat
 #define close _close
 #define mkdir _mkdir
-#define sprintf _sprintf
-#define snprintf _snprintf
+//bega 20220430
+// if platform toolset v143 comment this
+//#define sprintf _sprintf
+//#define snprintf _snprintf
 #define strcat _strcat
 #define strdup _strdup
 #define stricmp _stricmp
