@@ -116,9 +116,25 @@ bool pgSequence::DropObject(wxFrame *frame, ctlTree *browser, bool cascaded)
 
 void pgSequence::UpdateValues()
 {
-	pgSet *sequence = ExecuteSet(
-	                      wxT("SELECT last_value, min_value, max_value, cache_value, is_cycled, increment_by, is_called\n")
-	                      wxT("  FROM ") + GetQuotedFullIdentifier());
+	//bega 20220514
+	pgSet* sequence = NULL;
+	if (this->GetConnection()->BackendMaximumVersion(9, 6))
+	{
+		sequence = ExecuteSet(
+			wxT("SELECT last_value, min_value, max_value, cache_value, is_cycled, increment_by, is_called\n")
+			wxT("  FROM ") + GetQuotedFullIdentifier());
+	}
+	else
+	{
+		wxString seq_name = GetName();
+		wxString schema_name = GetSchema()->GetName();
+		sequence = ExecuteSet(wxT("SELECT  ps.last_value, min_value, max_value, cache_size as cache_value, cycle as is_cycled, increment_by, ids.is_called\n")
+			wxT("FROM pg_sequences ps, adminko.users_id_seq ids\n")
+			wxT("WHERE   schemaname = '"+schema_name+"' AND sequencename = '"+seq_name+"'\n"));
+
+	}
+	
+	
 	if (sequence)
 	{
 		lastValue = sequence->GetLongLong(wxT("last_value"));

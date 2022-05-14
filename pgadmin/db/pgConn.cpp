@@ -498,6 +498,29 @@ bool pgConn::BackendMinimumVersion(int major, int minor)
 	return majorVersion > major || (majorVersion == major && minorVersion >= minor);
 }
 
+bool pgConn::BackendMaximumVersion(int major, int minor)
+{
+	if (!majorVersion)
+	{
+		wxString version = GetVersionString();
+		sscanf(version.ToAscii(), "%*s %d.%d.%d", &majorVersion, &minorVersion, &patchVersion);
+		isEdb = version.Upper().Matches(wxT("ENTERPRISEDB*"));
+
+		// EnterpriseDB 8.3 beta 1 & 2 and possibly later actually have PostgreSQL 8.2 style
+		// catalogs. This is expected to change either before GA, but in the meantime we
+		// need to check the catalogue version in more detail, and if we don't see what looks
+		// like a 8.3 catalog, force the version number back to 8.2. Yuck.
+		if (isEdb && majorVersion == 8 && minorVersion == 3)
+		{
+			if (ExecuteScalar(wxT("SELECT count(*) FROM pg_attribute WHERE attname = 'proconfig' AND attrelid = 'pg_proc'::regclass")) == wxT("0"))
+				minorVersion = 2;
+		}
+
+		isGreenplum = version.Upper().Matches(wxT("*GREENPLUM DATABASE*"));
+		isHawq = version.Upper().Matches(wxT("*GREENPLUM DATABASE*")) && version.Upper().Matches(wxT("*HAWQ*"));;
+	}
+	return majorVersion < major || (majorVersion == major && minorVersion <= minor);
+}
 
 // Greenplum sometimes adds features in patch releases, because Greenplum
 // releases are not coordinated with PostgreSQL minor releases.

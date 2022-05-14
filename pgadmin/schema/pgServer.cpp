@@ -887,7 +887,48 @@ int pgServer::Connect(frmMain *form, bool askPassword, const wxString &pwd, bool
 		connected = true;
 		bool hasUptime = false;
 
+		//bega 20220501
+		//Correct only for from 9.6 to 14.2
+
+		/*
+		* *since 9.0 add pg_last_xlog_receive_location() replace in 10.0
+		* pg_last_xlog_receive_location() => pg_last_wal_receive_lsn()
+		* pg_last_xlog_replay_location() => pg_last_wal_replay_lsn()
+		* pg_is_xlog_replay_paused() => pg_is_wal_replay_paused()
+		SELECT usecreatedb, usesuper, 
+		CASE WHEN usesuper THEN pg_postmaster_start_time() ELSE NULL END as upsince, 
+		CASE WHEN usesuper THEN pg_conf_load_time() ELSE NULL END as confloadedsince, 
+		CASE WHEN usesuper THEN pg_is_in_recovery() ELSE NULL END as inrecovery, 
+		CASE WHEN usesuper THEN pg_last_wal_receive_lsn()  ELSE NULL END as receiveloc,
+		CASE WHEN usesuper THEN  pg_last_wal_replay_lsn()  ELSE NULL END as replayloc,
+		CASE WHEN usesuper THEN pg_last_xact_replay_timestamp() ELSE NULL END as replay_timestamp,
+		CASE WHEN usesuper AND pg_is_in_recovery() THEN pg_is_wal_replay_paused()  ELSE NULL END as isreplaypaused
+		FROM pg_user WHERE usename = current_user
+		*/
+
 		wxString sql = wxT("SELECT usecreatedb, usesuper");
+		sql += wxT(", CASE WHEN usesuper THEN pg_postmaster_start_time() ELSE NULL END as upsince ");
+		sql += wxT(", CASE WHEN usesuper THEN pg_conf_load_time() ELSE NULL END as confloadedsince ");
+		sql += wxT(", CASE WHEN usesuper THEN pg_is_in_recovery() ELSE NULL END as inrecovery");
+		sql += wxT(", CASE WHEN usesuper THEN pg_last_xact_replay_timestamp() ELSE NULL END as replay_timestamp");
+		
+		if (conn->BackendMaximumVersion(9, 6))
+		{
+			sql += wxT(", CASE WHEN usesuper THEN pg_last_xlog_receive_location()  ELSE NULL END as receiveloc");
+			sql += wxT(", CASE WHEN usesuper THEN pg_last_xlog_replay_location()  ELSE NULL END as replayloc");
+			sql += wxT(", CASE WHEN usesuper AND pg_is_in_recovery() THEN pg_is_xlog_replay_paused()  ELSE NULL END as isreplaypaused");
+		}
+		else if (conn->BackendMinimumVersion(10, 0))
+		{
+			sql += wxT(", CASE WHEN usesuper THEN pg_last_wal_receive_lsn()  ELSE NULL END as receiveloc");
+			sql += wxT(", CASE WHEN usesuper THEN  pg_last_wal_replay_lsn()  ELSE NULL END as replayloc");
+			sql += wxT(", CASE WHEN usesuper AND pg_is_in_recovery() THEN pg_is_wal_replay_paused()  ELSE NULL END as isreplaypaused");
+		}
+		else
+		{
+
+		}
+		/*
 		if (conn->BackendMinimumVersion(8, 1))
 		{
 			hasUptime = true;
@@ -912,12 +953,22 @@ int pgServer::Connect(frmMain *form, bool askPassword, const wxString &pwd, bool
 		{
 			sql += wxT(", CASE WHEN usesuper THEN pg_last_xact_replay_timestamp() ELSE NULL END as replay_timestamp");
 			sql += wxT(", CASE WHEN usesuper AND pg_is_in_recovery() THEN pg_is_xlog_replay_paused() ELSE NULL END as isreplaypaused");
-		}
+		}*/
 
 		pgSet *set = ExecuteSet(sql + wxT("\n  FROM pg_user WHERE usename=current_user"));
 		if (set)
 		{
 			iSetCreatePrivilege(set->GetBool(wxT("usecreatedb")));
+			iSetSuperUser(set->GetBool(wxT("usesuper")));
+			iSetUpSince(set->GetDateTime(wxT("upsince")));
+			iSetConfLoadedSince(set->GetDateTime(wxT("confloadedsince")));
+			iSetInRecovery(set->GetBool(wxT("inrecovery")));
+			iSetReplayLoc(set->GetVal(wxT("replayloc")));
+			iSetReceiveLoc(set->GetVal(wxT("receiveloc")));
+			iSetReplayTimestamp(set->GetVal(wxT("replay_timestamp")));
+			SetReplayPaused(set->GetBool(wxT("isreplaypaused")));
+
+			/*iSetCreatePrivilege(set->GetBool(wxT("usecreatedb")));
 			iSetSuperUser(set->GetBool(wxT("usesuper")));
 			if (hasUptime)
 				iSetUpSince(set->GetDateTime(wxT("upsince")));
@@ -933,7 +984,7 @@ int pgServer::Connect(frmMain *form, bool askPassword, const wxString &pwd, bool
 			{
 				iSetReplayTimestamp(set->GetVal(wxT("replay_timestamp")));
 				SetReplayPaused(set->GetBool(wxT("isreplaypaused")));
-			}
+			}*/
 			delete set;
 		}
 

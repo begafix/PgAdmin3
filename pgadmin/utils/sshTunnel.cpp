@@ -478,8 +478,8 @@ CSubThread::~CSubThread(void)
 void *
 CSubThread::Entry()
 {
-	fd_set fds;
-	struct timeval tv;
+	fd_set fds = {};
+	struct timeval tv = {};
 	ssize_t len, wr;
 	char buf[20480];
 	int rc, i = 0;

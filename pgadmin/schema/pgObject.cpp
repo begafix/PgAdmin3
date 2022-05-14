@@ -483,8 +483,22 @@ void pgObject::ShowDependencies(frmMain *form, ctlListView *Dependencies, const 
 	*                        la.lanname, rw.rulename, ns.nspname)
 	*     END
 	*/
+	//bega 20220512
+	//replace for adsrc since version 12.0 this field is absent. Replace with pg_get_expr(adbin, adrelid)
+
+	pgConn* conn = GetConnection();
+	wxString depQuery;
+	if (conn->BackendMaximumVersion(11, 0))
+	{
+		depQuery = wxT("SELECT DISTINCT dep.deptype, dep.refclassid, cl.relkind, ad.adbin, ad.adsrc, \n");
+	}
+	else if (conn->BackendMinimumVersion(12, 0))
+	{
+		depQuery = wxT("SELECT DISTINCT dep.deptype, dep.refclassid, cl.relkind, ad.adbin, pg_get_expr(adbin, adrelid) as adsrc, \n");
+	}
+
 	ShowDependency(GetDatabase(), Dependencies,
-	               wxT("SELECT DISTINCT dep.deptype, dep.refclassid, cl.relkind, ad.adbin, ad.adsrc, \n")
+	               depQuery +
 	               wxT("       CASE WHEN cl.relkind IS NOT NULL THEN cl.relkind || COALESCE(dep.refobjsubid::text, '')\n")
 	               wxT("            WHEN tg.oid IS NOT NULL THEN 'T'::text\n")
 	               wxT("            WHEN ty.oid IS NOT NULL THEN 'y'::text\n")
@@ -520,7 +534,7 @@ void pgObject::ShowDependencies(frmMain *form, ctlListView *Dependencies, const 
 	               wxT("  LEFT JOIN pg_attrdef ad ON ad.adrelid=att.attrelid AND ad.adnum=att.attnum\n")
 	               + where, wxT("refclassid"));
 
-	pgConn *conn = GetConnection();
+	
 	if (conn)
 	{
 		if (where.Find(wxT("subid")) < 0 && conn->BackendMinimumVersion(8, 1))
@@ -650,8 +664,22 @@ void pgObject::ShowDependents(frmMain *form, ctlListView *referencedBy, const wx
 	*                        la.lanname, rw.rulename, ns.nspname)
 	*     END
 	*/
+	//bega 20220512
+	//replace for adsrc since version 12.0 this field is absent. Replace with pg_get_expr(adbin, adrelid)
+
+	pgConn* conn = GetConnection();
+	wxString depQuery;
+	if (conn->BackendMaximumVersion(11, 0))
+	{
+		depQuery = wxT("SELECT DISTINCT dep.deptype, dep.classid, cl.relkind, ad.adbin, ad.adsrc, \n");
+	}
+	else if (conn->BackendMinimumVersion(12, 0))
+	{
+		depQuery = wxT("SELECT DISTINCT dep.deptype, dep.classid, cl.relkind, ad.adbin, pg_get_expr(adbin, adrelid) as adsrc, \n");
+	}
+
 	ShowDependency(GetDatabase(), referencedBy,
-	               wxT("SELECT DISTINCT dep.deptype, dep.classid, cl.relkind, ad.adbin, ad.adsrc, \n")
+	               depQuery +
 	               wxT("       CASE WHEN cl.relkind IS NOT NULL THEN cl.relkind || COALESCE(dep.objsubid::text, '')\n")
 	               wxT("            WHEN tg.oid IS NOT NULL THEN 'T'::text\n")
 	               wxT("            WHEN ty.oid IS NOT NULL THEN 'y'::text\n")
@@ -706,7 +734,7 @@ void pgObject::ShowDependents(frmMain *form, ctlListView *referencedBy, const wx
 	* table, we come up with this solution.
 	*
 	*/
-	pgConn *conn = GetConnection();
+	
 	if (conn && (GetMetaType() == PGM_TABLE || GetMetaType() == PGM_COLUMN))
 	{
 		int iconId = sequenceFactory.GetIconId();
@@ -1495,7 +1523,7 @@ wxString pgSchemaObject::GetFullIdentifier() const
 
 
 wxString pgSchemaObject::GetQuotedFullIdentifier() const
-{
+{	
 	if (schema->GetTypeName() == wxT("Table"))
 		return schema->GetSchema()->GetQuotedPrefix() + GetQuotedIdentifier();
 	else

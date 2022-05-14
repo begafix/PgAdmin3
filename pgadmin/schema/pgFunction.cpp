@@ -787,7 +787,17 @@ pgFunction *pgFunctionFactory::AppendFunctions(pgObject *obj, pgSchema *schema, 
 				function->iSetArgDefValCount(functions->GetLong(wxT("pronargdefaults")));
 
 				// Check if it is a window function
-				function->iSetIsWindow(functions->GetBool(wxT("proiswindow")));
+				if (obj->GetConnection()->BackendMinimumVersion(11, 0))
+				{			
+					char* c = functions->GetCharPtr(wxT("prokind"));
+					function->iSetIsWindow( *c == 'w'?true:false);					
+				}
+				else
+				{
+					function->iSetIsWindow(functions->GetBool(wxT("proiswindow")));
+				}
+				
+				
 			}
 			else
 				function->iSetIsWindow(false);
@@ -1060,9 +1070,20 @@ wxString pgProcedure::GetExecSql(ctlTree *browser)
 
 pgObject *pgFunctionFactory::CreateObjects(pgCollection *collection, ctlTree *browser, const wxString &restr)
 {
-	wxString funcRestriction = wxT(
-	                               " WHERE proisagg = FALSE AND pronamespace = ") + NumToStr(collection->GetSchema()->GetOid())
-	                           + wxT("::oid\n   AND typname NOT IN ('trigger', 'event_trigger') \n");
+	wxString funcRestriction;
+	if (collection->GetConnection()->BackendMinimumVersion(11, 0))
+	{
+		funcRestriction = wxT(
+			" WHERE prokind<>'a' AND pronamespace = ") + NumToStr(collection->GetSchema()->GetOid())
+			+ wxT("::oid\n   AND typname NOT IN ('trigger', 'event_trigger') \n");
+	}
+	else
+	{
+		funcRestriction = wxT(
+			" WHERE proisagg = FALSE AND pronamespace = ") + NumToStr(collection->GetSchema()->GetOid())
+			+ wxT("::oid\n   AND typname NOT IN ('trigger', 'event_trigger') \n");
+	}
+	
 
 	if (collection->GetConnection()->EdbMinimumVersion(8, 1))
 		funcRestriction += wxT("   AND NOT (lanname = 'edbspl' AND protype = '1')\n");
@@ -1081,9 +1102,20 @@ pgCollection *pgFunctionFactory::CreateCollection(pgObject *obj)
 
 pgObject *pgTriggerFunctionFactory::CreateObjects(pgCollection *collection, ctlTree *browser, const wxString &restr)
 {
-	wxString funcRestriction = wxT(
-	                               " WHERE proisagg = FALSE AND pronamespace = ") + NumToStr(collection->GetSchema()->GetOid())
-	                           + wxT("::oid\n");
+	wxString funcRestriction;
+	if (collection->GetConnection()->BackendMinimumVersion(11, 0))
+	{
+		funcRestriction = wxT(
+			" WHERE prokind<>'a' AND pronamespace = ") + NumToStr(collection->GetSchema()->GetOid())
+			+ wxT("::oid\n");
+	}
+	else
+	{
+		funcRestriction = wxT(
+			" WHERE proisagg = FALSE AND pronamespace = ") + NumToStr(collection->GetSchema()->GetOid())
+			+ wxT("::oid\n");
+	}
+	
 	if(collection->GetConnection()->BackendMinimumVersion(9, 3))
 	{
 		funcRestriction += wxT("AND (typname IN ('trigger', 'event_trigger') \nAND lanname NOT IN ('edbspl', 'sql', 'internal'))");
@@ -1100,10 +1132,21 @@ pgObject *pgTriggerFunctionFactory::CreateObjects(pgCollection *collection, ctlT
 
 pgObject *pgProcedureFactory::CreateObjects(pgCollection *collection, ctlTree *browser, const wxString &restr)
 {
-	wxString funcRestriction = wxT(
-	                               " WHERE proisagg = FALSE AND pronamespace = ") + NumToStr(collection->GetSchema()->GetOid())
-	                           + wxT("::oid AND lanname = 'edbspl'\n");
+	wxString funcRestriction;
+	if (collection->GetConnection()->BackendMaximumVersion(11, 0))
+	{
+		funcRestriction = wxT(
+			" WHERE proisagg = FALSE AND pronamespace = ") + NumToStr(collection->GetSchema()->GetOid())
+			+ wxT("::oid AND lanname = 'edbspl'\n");
 
+	}
+	else
+	{
+		funcRestriction = wxT(
+			" WHERE prokind <>'a' AND pronamespace = ") + NumToStr(collection->GetSchema()->GetOid())
+			+ wxT("::oid AND lanname = 'edbspl'\n");
+	}
+	 
 	if (collection->GetConnection()->EdbMinimumVersion(8, 1))
 		funcRestriction += wxT("   AND protype = '1'\n");
 	else

@@ -2323,10 +2323,23 @@ sqlTable::sqlTable(pgConn *conn, pgQueryThread *_thread, const wxString &tabName
 		}
 		delete allColsSet;
 	}
+	//bega 20220514
+	//replace for adsrc since version 12.0 this field is absent. Replace with pg_get_expr(adbin, adrelid)
+	
+	wxString depQuery;
+	if (connection->BackendMaximumVersion(11, 0))
+	{
+		depQuery = wxT("SELECT n.nspname AS nspname, relname, format_type(t.oid,NULL) AS typname, format_type(t.oid, att.atttypmod) AS displaytypname, ")
+				   wxT("nt.nspname AS typnspname, attname, attnum, COALESCE(b.oid, t.oid) AS basetype, atthasdef, adsrc,\n");
+	}
+	else if (connection->BackendMinimumVersion(12, 0))
+	{
+		depQuery = wxT("SELECT n.nspname AS nspname, relname, format_type(t.oid,NULL) AS typname, format_type(t.oid, att.atttypmod) AS displaytypname, ")
+				   wxT("nt.nspname AS typnspname, attname, attnum, COALESCE(b.oid, t.oid) AS basetype, atthasdef, pg_get_expr(adbin, adrelid) as adsrc,\n");
+	}
 
 	pgSet *colSet = connection->ExecuteSet(
-	                    wxT("SELECT n.nspname AS nspname, relname, format_type(t.oid,NULL) AS typname, format_type(t.oid, att.atttypmod) AS displaytypname, ")
-	                    wxT("nt.nspname AS typnspname, attname, attnum, COALESCE(b.oid, t.oid) AS basetype, atthasdef, adsrc,\n")
+						depQuery +     
 	                    wxT("       CASE WHEN t.typbasetype::oid=0 THEN att.atttypmod else t.typtypmod END AS typmod,\n")
 	                    wxT("       CASE WHEN t.typbasetype::oid=0 THEN att.attlen else t.typlen END AS typlen\n")
 	                    wxT("  FROM pg_attribute att\n")

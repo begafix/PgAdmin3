@@ -1051,8 +1051,12 @@ wxTreeItemId frmMain::RestoreEnvironment(pgServer *server)
 int frmMain::ReconnectServer(pgServer *server, bool restore)
 {
 	// Create a server object and connect it.
+#ifndef DEBUG
 	wxBusyInfo waiting(wxString::Format(_("Connecting to server %s (%s:%d)"),
-	                                    server->GetDescription().c_str(), server->GetName().c_str(), server->GetPort()), this);
+		server->GetDescription().c_str(), server->GetName().c_str(), server->GetPort()), this);
+#endif // !DEBUG
+
+	
 
 	// Give the UI a chance to redraw
 	wxSafeYield();

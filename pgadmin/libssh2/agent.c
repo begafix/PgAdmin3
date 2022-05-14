@@ -268,7 +268,7 @@ static int
 agent_connect_pageant(LIBSSH2_AGENT *agent)
 {
     HWND hwnd;
-    hwnd = FindWindow("Pageant", "Pageant");
+    hwnd = FindWindow(L"Pageant", L"Pageant");
     if (!hwnd)
         return _libssh2_error(agent->session, LIBSSH2_ERROR_AGENT_PROTOCOL,
                               "failed connecting agent");
@@ -291,7 +291,7 @@ agent_transact_pageant(LIBSSH2_AGENT *agent, agent_transaction_ctx_t transctx)
         return _libssh2_error(agent->session, LIBSSH2_ERROR_INVAL,
                               "illegal input");
 
-    hwnd = FindWindow("Pageant", "Pageant");
+    hwnd = FindWindow(L"Pageant", L"Pageant");
     if (!hwnd)
         return _libssh2_error(agent->session, LIBSSH2_ERROR_AGENT_PROTOCOL,
                               "found no pageant");

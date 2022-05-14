@@ -31,13 +31,13 @@
 
 // App headers
 
-pgTable::pgTable(pgSchema *newSchema, const wxString &newName)
+pgTable::pgTable(pgSchema* newSchema, const wxString& newName)
 	: pgSchemaObject(newSchema, tableFactory, newName)
 {
 	Init();
 }
 
-pgTable::pgTable(pgSchema *newSchema, pgaFactory &newFactory, const wxString &newName)
+pgTable::pgTable(pgSchema* newSchema, pgaFactory& newFactory, const wxString& newName)
 	: pgSchemaObject(newSchema, newFactory, newName)
 {
 	Init();
@@ -90,11 +90,11 @@ wxString pgTable::GetTranslatedMessage(int kindOfMessage) const
 			break;
 		case DROPINCLUDINGDEPS:
 			message = wxString::Format(_("Are you sure you wish to drop table \"%s\" including all objects that depend on it?"),
-			                           GetFullIdentifier().c_str());
+				GetFullIdentifier().c_str());
 			break;
 		case DROPEXCLUDINGDEPS:
 			message = wxString::Format(_("Are you sure you wish to drop table \"%s\"?"),
-			                           GetFullIdentifier().c_str());
+				GetFullIdentifier().c_str());
 			break;
 		case DROPCASCADETITLE:
 			message = _("Drop table cascaded?");
@@ -143,11 +143,11 @@ wxString pgTable::GetTranslatedMessage(int kindOfMessage) const
 			break;
 		case BACKUPTITLE:
 			message = wxString::Format(_("Backup table \"%s\""),
-			                           GetFullIdentifier().c_str());
+				GetFullIdentifier().c_str());
 			break;
 		case RESTORETITLE:
 			message = wxString::Format(_("Restore table \"%s\""),
-			                           GetFullIdentifier().c_str());
+				GetFullIdentifier().c_str());
 			break;
 	}
 
@@ -164,9 +164,9 @@ int pgTable::GetIconId()
 }
 
 
-wxMenu *pgTable::GetNewMenu()
+wxMenu* pgTable::GetNewMenu()
 {
-	wxMenu *menu = pgObject::GetNewMenu();
+	wxMenu* menu = pgObject::GetNewMenu();
 	if (schema->GetCreatePrivilege())
 	{
 		columnFactory.AppendMenu(menu);
@@ -184,29 +184,29 @@ wxMenu *pgTable::GetNewMenu()
 		 * TEMPORARY:  Disable adding new partitions until that code is working right.
 		 *
 		if (GetConnection() != 0 && GetConnection()->GetIsGreenplum() && GetIsPartitioned())
-		    partitionFactory.AppendMenu(menu);
+			partitionFactory.AppendMenu(menu);
 		 */
 	}
 	return menu;
 }
 
 
-int pgTable::GetReplicationStatus(ctlTree *browser, wxString *clusterName, long *setId)
+int pgTable::GetReplicationStatus(ctlTree* browser, wxString* clusterName, long* setId)
 {
 	wxArrayString clusters = GetDatabase()->GetSlonyClusters(browser);
 
 	bool isSubscribed = false;
 
 	size_t i;
-	for (i = 0 ; i < clusters.GetCount() ; i++)
+	for (i = 0; i < clusters.GetCount(); i++)
 	{
 		wxString nsp = qtIdent(wxT("_") + clusters.Item(i));
 
 		pgSetIterator sets(GetConnection(),
-		                   wxT("SELECT tab_set, sub_provider, ") + nsp + wxT(".getlocalnodeid(") + qtDbString(wxT("_") + clusters.Item(i)) + wxT(") AS localnode\n")
-		                   wxT("  FROM ") + nsp + wxT(".sl_table\n")
-		                   wxT("  LEFT JOIN ") + nsp + wxT(".sl_subscribe ON sub_set=tab_set\n")
-		                   wxT(" WHERE tab_reloid = ") + GetOidStr());
+			wxT("SELECT tab_set, sub_provider, ") + nsp + wxT(".getlocalnodeid(") + qtDbString(wxT("_") + clusters.Item(i)) + wxT(") AS localnode\n")
+			wxT("  FROM ") + nsp + wxT(".sl_table\n")
+			wxT("  LEFT JOIN ") + nsp + wxT(".sl_subscribe ON sub_set=tab_set\n")
+			wxT(" WHERE tab_reloid = ") + GetOidStr());
 
 		if (sets.RowsLeft())
 		{
@@ -244,7 +244,7 @@ wxString pgTable::GetHelpPage(bool forCreate) const
 }
 
 
-bool pgTable::DropObject(wxFrame *frame, ctlTree *browser, bool cascaded)
+bool pgTable::DropObject(wxFrame* frame, ctlTree* browser, bool cascaded)
 {
 	wxString sql = wxT("DROP TABLE ") + this->GetSchema()->GetQuotedIdentifier() + wxT(".") + this->GetQuotedIdentifier();
 	if (cascaded)
@@ -265,24 +265,24 @@ bool pgTable::Truncate(bool cascaded)
 bool pgTable::ResetStats()
 {
 	wxString sql = wxT("SELECT pg_stat_reset_single_table_counters(")
-	               + NumToStr(this->GetOid())
-	               + wxT(")");
+		+ NumToStr(this->GetOid())
+		+ wxT(")");
 	return GetDatabase()->ExecuteVoid(sql);
 }
 
 
-void pgTable::AppendStuff(wxString &sql, ctlTree *browser, pgaFactory &factory)
+void pgTable::AppendStuff(wxString& sql, ctlTree* browser, pgaFactory& factory)
 {
 	wxString tmp;
 
-	pgCollection *collection = browser->FindCollection(factory, GetId());
+	pgCollection* collection = browser->FindCollection(factory, GetId());
 	if (collection)
 	{
 		tmp += wxT("\n");
 		collection->ShowTreeDetail(browser);
 
 		treeObjectIterator idxIt(browser, collection);
-		pgObject *obj;
+		pgObject* obj;
 		while ((obj = idxIt.GetNextObject()) != 0)
 		{
 			obj->ShowTreeDetail(browser);
@@ -295,15 +295,15 @@ void pgTable::AppendStuff(wxString &sql, ctlTree *browser, pgaFactory &factory)
 		sql += tmp;
 }
 
-void pgTable::AppendStuffNoSql(wxString &sql, ctlTree *browser, pgaFactory &factory)
+void pgTable::AppendStuffNoSql(wxString& sql, ctlTree* browser, pgaFactory& factory)
 {
-	pgCollection *collection = browser->FindCollection(factory, GetId());
+	pgCollection* collection = browser->FindCollection(factory, GetId());
 	if (collection)
 	{
 		collection->ShowTreeDetail(browser);
 
 		treeObjectIterator idxIt(browser, collection);
-		pgObject *obj;
+		pgObject* obj;
 		while ((obj = idxIt.GetNextObject()) != 0)
 		{
 			obj->ShowTreeDetail(browser);
@@ -313,7 +313,7 @@ void pgTable::AppendStuffNoSql(wxString &sql, ctlTree *browser, pgaFactory &fact
 
 
 
-wxString pgTable::GetSql(ctlTree *browser)
+wxString pgTable::GetSql(ctlTree* browser)
 {
 	wxString colDetails, conDetails;
 	wxString prevComment;
@@ -326,10 +326,10 @@ wxString pgTable::GetSql(ctlTree *browser)
 		// make sure all kids are appended
 		ShowTreeDetail(browser);
 		sql = wxT("-- Table: ") + GetQuotedFullIdentifier() + wxT("\n\n")
-		      + wxT("-- DROP TABLE ") + GetQuotedFullIdentifier() + wxT(";")
-		      + wxT("\n\nCREATE ");
+			+ wxT("-- DROP TABLE ") + GetQuotedFullIdentifier() + wxT(";")
+			+ wxT("\n\nCREATE ");
 		if (GetUnlogged())
-			sql +=  wxT("UNLOGGED ");
+			sql += wxT("UNLOGGED ");
 		sql += wxT("TABLE ") + GetQuotedFullIdentifier();
 
 		// of type (9.0 material)
@@ -338,12 +338,12 @@ wxString pgTable::GetSql(ctlTree *browser)
 
 		// Get a count of the constraints.
 		int consCount = 0;
-		pgCollection *constraints = browser->FindCollection(primaryKeyFactory, GetId());
+		pgCollection* constraints = browser->FindCollection(primaryKeyFactory, GetId());
 		if (constraints)
 			consCount = browser->GetChildrenCount(constraints->GetId());
 
 		// Get the columns
-		pgCollection *columns = browser->FindCollection(columnFactory, GetId());
+		pgCollection* columns = browser->FindCollection(columnFactory, GetId());
 		if (columns)
 		{
 			columns->ShowTreeDetail(browser);
@@ -353,10 +353,10 @@ wxString pgTable::GetSql(ctlTree *browser)
 
 			int lastRealCol = 0;
 			int currentCol = 0;
-			pgColumn *column;
+			pgColumn* column;
 
 			// Iterate the columns to find the last 'real' one
-			while ((column = (pgColumn *)colIt1.GetNextObject()) != 0)
+			while ((column = (pgColumn*)colIt1.GetNextObject()) != 0)
 			{
 				currentCol++;
 
@@ -366,7 +366,7 @@ wxString pgTable::GetSql(ctlTree *browser)
 
 			// Now build the actual column list
 			int colCount = 0;
-			while ((column = (pgColumn *)colIt2.GetNextObject()) != 0)
+			while ((column = (pgColumn*)colIt2.GetNextObject()) != 0)
 			{
 				column->ShowTreeDetail(browser);
 				if (column->GetColNumber() > 0)
@@ -387,7 +387,7 @@ wxString pgTable::GetSql(ctlTree *browser)
 						if (!column->GetIsLocal())
 						{
 							cols_sql += wxString::Format(wxT("-- %s "), _("Inherited"))
-							            + wxT("from table ") +  column->GetInheritedTableName() + wxT(":");
+								+ wxT("from table ") + column->GetInheritedTableName() + wxT(":");
 						}
 					}
 
@@ -396,19 +396,19 @@ wxString pgTable::GetSql(ctlTree *browser)
 						if (column->GetDefinition().Length() == 0)
 						{
 							cols_sql += wxString::Format(wxT("-- %s "), _("Inherited"))
-							            + wxT("from type ") +  ofType + wxT(": ")
-							            + column->GetQuotedIdentifier();
+								+ wxT("from type ") + ofType + wxT(": ")
+								+ column->GetQuotedIdentifier();
 						}
 						else
 						{
 							cols_sql += wxT("  ") + column->GetQuotedIdentifier() + wxT(" WITH OPTIONS ")
-							            + column->GetDefinition();
+								+ column->GetDefinition();
 						}
 					}
 					else
 					{
 						cols_sql += wxT("  ") + column->GetQuotedIdentifier() + wxT(" ")
-						            + column->GetDefinition();
+							+ column->GetDefinition();
 					}
 
 					prevComment = column->GetComment();
@@ -443,7 +443,7 @@ wxString pgTable::GetSql(ctlTree *browser)
 			constraints->ShowTreeDetail(browser);
 			treeObjectIterator consIt(browser, constraints);
 
-			pgObject *data;
+			pgObject* data;
 
 			while ((data = consIt.GetNextObject()) != 0)
 			{
@@ -455,30 +455,30 @@ wxString pgTable::GetSql(ctlTree *browser)
 					cols_sql += wxT(" -- ") + firstLineOnly(prevComment);
 
 				cols_sql += wxT("\n  CONSTRAINT ") + data->GetQuotedIdentifier()
-				            + wxT(" ") + data->GetTypeName().Upper()
-				            + wxT(" ") ;
+					+ wxT(" ") + data->GetTypeName().Upper()
+					+ wxT(" ");
 
 				prevComment = data->GetComment();
 				if (!data->GetComment().IsEmpty())
 					conDetails += wxT("COMMENT ON CONSTRAINT ") + data->GetQuotedIdentifier() +
-					              wxT(" ON ") + GetQuotedFullIdentifier() +
-					              wxT(" IS ") + qtDbString(data->GetComment()) + wxT(";\n");
+					wxT(" ON ") + GetQuotedFullIdentifier() +
+					wxT(" IS ") + qtDbString(data->GetComment()) + wxT(";\n");
 
 				switch (data->GetMetaType())
 				{
 					case PGM_PRIMARYKEY:
 					case PGM_UNIQUE:
 					case PGM_EXCLUDE:
-						cols_sql += ((pgIndexConstraint *)data)->GetDefinition();
+						cols_sql += ((pgIndexConstraint*)data)->GetDefinition();
 						break;
 					case PGM_FOREIGNKEY:
-						cols_sql += ((pgForeignKey *)data)->GetDefinition();
+						cols_sql += ((pgForeignKey*)data)->GetDefinition();
 						break;
 					case PGM_CHECK:
-						cols_sql += wxT("(") + ((pgCheck *)data)->GetDefinition() + wxT(")");
-						if (GetDatabase()->BackendMinimumVersion(9, 2) && ((pgCheck *)data)->GetNoInherit())
+						cols_sql += wxT("(") + ((pgCheck*)data)->GetDefinition() + wxT(")");
+						if (GetDatabase()->BackendMinimumVersion(9, 2) && ((pgCheck*)data)->GetNoInherit())
 							cols_sql += wxT(" NO INHERIT");
-						if (GetDatabase()->BackendMinimumVersion(9, 2) && !((pgCheck *)data)->GetValid())
+						if (GetDatabase()->BackendMinimumVersion(9, 2) && !((pgCheck*)data)->GetValid())
 							cols_sql += wxT(" NOT VALID");
 						break;
 				}
@@ -512,10 +512,10 @@ wxString pgTable::GetSql(ctlTree *browser)
 			if (GetChecksum().Length() > 0)
 				sql += wxT("CHECKSUM=") + GetChecksum() + wxT(", ");
 			if (GetHasOids())
-				sql +=  wxT("\n  OIDS=TRUE");
+				sql += wxT("\n  OIDS=TRUE");
 			else
-				sql +=  wxT("\n  OIDS=FALSE");
-			if(GetConnection()->BackendMinimumVersion(8, 4))
+				sql += wxT("\n  OIDS=FALSE");
+			if (GetConnection()->BackendMinimumVersion(8, 4))
 			{
 				if (GetCustomAutoVacuumEnabled())
 				{
@@ -601,9 +601,9 @@ wxString pgTable::GetSql(ctlTree *browser)
 		else
 		{
 			if (GetHasOids())
-				sql +=  wxT("\nWITH OIDS");
+				sql += wxT("\nWITH OIDS");
 			else
-				sql +=  wxT("\nWITHOUT OIDS");
+				sql += wxT("\nWITHOUT OIDS");
 		}
 
 		if (GetConnection()->BackendMinimumVersion(8, 0) && tablespace != GetDatabase()->GetDefaultTablespace())
@@ -629,10 +629,10 @@ wxString pgTable::GetSql(ctlTree *browser)
 				while (collist.HasMoreTokens())
 				{
 					cn = collist.GetNextToken();
-					pgSet *set = ExecuteSet(
-					                 wxT("SELECT attname\n")
-					                 wxT("  FROM pg_attribute\n")
-					                 wxT(" WHERE attrelid=") + GetOidStr() + wxT(" AND attnum IN (") + cn + wxT(")"));
+					pgSet* set = ExecuteSet(
+						wxT("SELECT attname\n")
+						wxT("  FROM pg_attribute\n")
+						wxT(" WHERE attrelid=") + GetOidStr() + wxT(" AND attnum IN (") + cn + wxT(")"));
 					if (set)
 					{
 						if (!distributionColumns.IsNull())
@@ -671,7 +671,7 @@ wxString pgTable::GetSql(ctlTree *browser)
 
 
 		sql += wxT(";\n")
-		       + GetOwnerSql(7, 3);
+			+ GetOwnerSql(7, 3);
 
 		if (GetConnection()->BackendMinimumVersion(8, 4))
 			sql += GetGrant(wxT("arwdDxt"));
@@ -706,14 +706,14 @@ wxString pgTable::GetSql(ctlTree *browser)
 		 *
 		if (partitionDef.Length() > 0)
 		{
-		    AppendStuffNoSql(sql, browser, partitionFactory);
+			AppendStuffNoSql(sql, browser, partitionFactory);
 		}
 		 */
 	}
 	return sql;
 }
 
-wxString pgTable::GetCoveringIndex(ctlTree *browser, const wxString &collist)
+wxString pgTable::GetCoveringIndex(ctlTree* browser, const wxString& collist)
 {
 	// delivers the name of the index which covers the named columns
 	wxCookieType cookie;
@@ -721,20 +721,20 @@ wxString pgTable::GetCoveringIndex(ctlTree *browser, const wxString &collist)
 	wxTreeItemId collItem = browser->GetFirstChild(GetId(), cookie);
 	while (collItem)
 	{
-		pgObject *data = browser->GetObject(collItem);
+		pgObject* data = browser->GetObject(collItem);
 		if (data && data->IsCollection() && (data->GetMetaType() == PGM_CONSTRAINT || data->GetMetaType() == PGM_INDEX))
 		{
 			wxCookieType cookie2;
 			wxTreeItemId item = browser->GetFirstChild(collItem, cookie2);
 			while (item)
 			{
-				pgIndex *index = (pgIndex *)browser->GetObject(item);
+				pgIndex* index = (pgIndex*)browser->GetObject(item);
 				if (index && (index->GetMetaType() == PGM_INDEX || index->GetMetaType() == PGM_PRIMARYKEY
-				              || index->GetMetaType() == PGM_UNIQUE || index->GetMetaType() == PGM_EXCLUDE))
+					|| index->GetMetaType() == PGM_UNIQUE || index->GetMetaType() == PGM_EXCLUDE))
 				{
 					index->ShowTreeDetail(browser);
 					if (collist == index->GetColumns() ||
-					        collist + wxT(",") == index->GetColumns().Left(collist.Length() + 1))
+						collist + wxT(",") == index->GetColumns().Left(collist.Length() + 1))
 						return index->GetName();
 				}
 				item = browser->GetNextChild(collItem, cookie2);
@@ -747,20 +747,20 @@ wxString pgTable::GetCoveringIndex(ctlTree *browser, const wxString &collist)
 }
 
 
-wxString pgTable::GetCols(ctlTree *browser, size_t indent, wxString &QMs, bool withQM)
+wxString pgTable::GetCols(ctlTree* browser, size_t indent, wxString& QMs, bool withQM)
 {
 	wxString sql;
 	wxString line;
 
 	int colcount = 0;
-	pgCollection *columns = browser->FindCollection(columnFactory, GetId());
+	pgCollection* columns = browser->FindCollection(columnFactory, GetId());
 	if (columns)
 	{
 		columns->ShowTreeDetail(browser);
 		treeObjectIterator colIt(browser, columns);
 
-		pgColumn *column;
-		while ((column = (pgColumn *)colIt.GetNextObject()) != 0)
+		pgColumn* column;
+		while ((column = (pgColumn*)colIt.GetNextObject()) != 0)
 		{
 			column->ShowTreeDetail(browser);
 			if (column->GetColNumber() > 0)
@@ -798,54 +798,54 @@ wxString pgTable::GetCols(ctlTree *browser, size_t indent, wxString &QMs, bool w
 	return sql;
 }
 
-pgCollection *pgTable::GetColumnCollection(ctlTree *browser)
+pgCollection* pgTable::GetColumnCollection(ctlTree* browser)
 {
-	pgCollection *columns = browser->FindCollection(columnFactory, GetId());
+	pgCollection* columns = browser->FindCollection(columnFactory, GetId());
 	return columns;
 }
 
-pgCollection *pgTable::GetConstraintCollection(ctlTree *browser)
+pgCollection* pgTable::GetConstraintCollection(ctlTree* browser)
 {
-	pgCollection *constraints = browser->FindCollection(constraintFactory, GetId());
+	pgCollection* constraints = browser->FindCollection(constraintFactory, GetId());
 	return constraints;
 }
 
-wxString pgTable::GetSelectSql(ctlTree *browser)
+wxString pgTable::GetSelectSql(ctlTree* browser)
 {
 	wxString qms;
 	wxString sql =
-	    wxT("SELECT ") + GetCols(browser, 7, qms, false) + wxT("\n")
-	    wxT("  FROM ") + GetQuotedFullIdentifier() + wxT(";\n");
+		wxT("SELECT ") + GetCols(browser, 7, qms, false) + wxT("\n")
+		wxT("  FROM ") + GetQuotedFullIdentifier() + wxT(";\n");
 	return sql;
 }
 
 
-wxString pgTable::GetInsertSql(ctlTree *browser)
+wxString pgTable::GetInsertSql(ctlTree* browser)
 {
 	wxString qms;
 	wxString sql =
-	    wxT("INSERT INTO ") + GetQuotedFullIdentifier() + wxT("(\n")
-	    wxT("            ") + GetCols(browser, 12, qms, false) + wxT(")\n")
-	    wxT("    VALUES (") + qms + wxT(");\n");
+		wxT("INSERT INTO ") + GetQuotedFullIdentifier() + wxT("(\n")
+		wxT("            ") + GetCols(browser, 12, qms, false) + wxT(")\n")
+		wxT("    VALUES (") + qms + wxT(");\n");
 	return sql;
 }
 
 
-wxString pgTable::GetUpdateSql(ctlTree *browser)
+wxString pgTable::GetUpdateSql(ctlTree* browser)
 {
 	wxString qms;
 	wxString sql =
-	    wxT("UPDATE ") + GetQuotedFullIdentifier() + wxT("\n")
-	    wxT("   SET ") + GetCols(browser, 7, qms, true) + wxT("\n")
-	    wxT(" WHERE <condition>;\n");
+		wxT("UPDATE ") + GetQuotedFullIdentifier() + wxT("\n")
+		wxT("   SET ") + GetCols(browser, 7, qms, true) + wxT("\n")
+		wxT(" WHERE <condition>;\n");
 	return sql;
 }
 
-wxString pgTable::GetDeleteSql(ctlTree *browser)
+wxString pgTable::GetDeleteSql(ctlTree* browser)
 {
 	wxString sql =
-	    wxT("DELETE FROM ") + GetQuotedFullIdentifier() + wxT("\n")
-	    wxT(" WHERE <condition>;\n");
+		wxT("DELETE FROM ") + GetQuotedFullIdentifier() + wxT("\n")
+		wxT(" WHERE <condition>;\n");
 	return sql;
 }
 
@@ -865,7 +865,7 @@ bool pgTable::EnableTriggers(const bool b)
 
 void pgTable::UpdateRows()
 {
-	pgSet *props = ExecuteSet(wxT("SELECT count(*) AS rows FROM ONLY ") + GetQuotedFullIdentifier());
+	pgSet* props = ExecuteSet(wxT("SELECT count(*) AS rows FROM ONLY ") + GetQuotedFullIdentifier());
 	if (props)
 	{
 		rows = props->GetLongLong(0);
@@ -878,13 +878,13 @@ void pgTable::UpdateRows()
 void pgTable::UpdateInheritance()
 {
 	// not checked so far
-	pgSet *props = ExecuteSet(
-	                   wxT("SELECT c.oid, c.relname , nspname\n")
-	                   wxT("  FROM pg_inherits i\n")
-	                   wxT("  JOIN pg_class c ON c.oid = i.inhparent\n")
-	                   wxT("  JOIN pg_namespace n ON n.oid=c.relnamespace\n")
-	                   wxT(" WHERE i.inhrelid = ") + GetOidStr() + wxT("\n")
-	                   wxT(" ORDER BY inhseqno"));
+	pgSet* props = ExecuteSet(
+		wxT("SELECT c.oid, c.relname , nspname\n")
+		wxT("  FROM pg_inherits i\n")
+		wxT("  JOIN pg_class c ON c.oid = i.inhparent\n")
+		wxT("  JOIN pg_namespace n ON n.oid=c.relnamespace\n")
+		wxT(" WHERE i.inhrelid = ") + GetOidStr() + wxT("\n")
+		wxT(" ORDER BY inhseqno"));
 	if (props)
 	{
 		inheritedTableCount = 0;
@@ -898,9 +898,9 @@ void pgTable::UpdateInheritance()
 			}
 			inheritedTables += props->GetVal(wxT("relname"));
 			quotedInheritedTables += GetQuotedSchemaPrefix(props->GetVal(wxT("nspname")))
-			                         + qtIdent(props->GetVal(wxT("relname")));
+				+ qtIdent(props->GetVal(wxT("relname")));
 			quotedInheritedTablesList.Add(GetQuotedSchemaPrefix(props->GetVal(wxT("nspname")))
-			                              + qtIdent(props->GetVal(wxT("relname"))));
+				+ qtIdent(props->GetVal(wxT("relname"))));
 			inheritedTablesOidList.Add(props->GetVal(wxT("oid")));
 			props->MoveNext();
 			inheritedTableCount++;
@@ -913,7 +913,7 @@ void pgTable::UpdateInheritance()
 
 
 
-void pgTable::ShowTreeDetail(ctlTree *browser, frmMain *form, ctlListView *properties, ctlSQLBox *sqlPane)
+void pgTable::ShowTreeDetail(ctlTree* browser, frmMain* form, ctlListView* properties, ctlSQLBox* sqlPane)
 {
 	if (!expandedKids)
 	{
@@ -941,10 +941,10 @@ void pgTable::ShowTreeDetail(ctlTree *browser, frmMain *form, ctlListView *prope
 		while (collist.HasMoreTokens())
 		{
 			cn = collist.GetNextToken();
-			pgSet *set = ExecuteSet(
-			                 wxT("SELECT attname\n")
-			                 wxT("  FROM pg_attribute\n")
-			                 wxT(" WHERE attrelid=") + GetOidStr() + wxT(" AND attnum IN (") + cn + wxT(")"));
+			pgSet* set = ExecuteSet(
+				wxT("SELECT attname\n")
+				wxT("  FROM pg_attribute\n")
+				wxT(" WHERE attrelid=") + GetOidStr() + wxT(" AND attnum IN (") + cn + wxT(")"));
 			if (set)
 			{
 				if (!primaryKey.IsNull())
@@ -971,7 +971,7 @@ void pgTable::ShowTreeDetail(ctlTree *browser, frmMain *form, ctlListView *prope
 		properties->AppendItem(_("Name"), GetName());
 		if (GetConnection() != 0 && GetConnection()->GetIsGreenplum())
 		{
-			gpPartition *p = dynamic_cast<gpPartition *>(this);
+			gpPartition* p = dynamic_cast<gpPartition*>(this);
 			if (p != 0)
 				properties->AppendItem(_("Partition Name"), p->GetPartitionName());
 		}
@@ -1061,8 +1061,8 @@ void pgTable::ShowTreeDetail(ctlTree *browser, frmMain *form, ctlListView *prope
 
 		/* Custom TOAST-TABLE AutoVacuum Settings */
 		if (GetConnection()->BackendMinimumVersion(8, 4) &&
-		        GetHasToastTable() &&
-		        GetToastCustomAutoVacuumEnabled())
+			GetHasToastTable() &&
+			GetToastCustomAutoVacuumEnabled())
 		{
 			if (GetToastAutoVacuumEnabled() != 2)
 			{
@@ -1090,7 +1090,7 @@ void pgTable::ShowTreeDetail(ctlTree *browser, frmMain *form, ctlListView *prope
 			wxArrayString seclabels = GetProviderLabelArray();
 			if (seclabels.GetCount() > 0)
 			{
-				for (unsigned int index = 0 ; index < seclabels.GetCount() - 1 ; index += 2)
+				for (unsigned int index = 0; index < seclabels.GetCount() - 1; index += 2)
 				{
 					properties->AppendItem(seclabels.Item(index), seclabels.Item(index + 1));
 				}
@@ -1133,7 +1133,7 @@ bool pgTable::GetVacuumHint()
 }
 
 
-void pgTable::ShowHint(frmMain *form, bool force)
+void pgTable::ShowHint(frmMain* form, bool force)
 {
 	hintShown = true;
 	int rc;
@@ -1153,7 +1153,7 @@ void pgTable::ShowHint(frmMain *form, bool force)
 
 	if (rc == HINT_RC_FIX)
 	{
-		frmMaintenance *frm = new frmMaintenance(form, this);
+		frmMaintenance* frm = new frmMaintenance(form, this);
 		frm->Go();
 	}
 }
@@ -1161,12 +1161,12 @@ void pgTable::ShowHint(frmMain *form, bool force)
 
 
 
-pgObject *pgTable::Refresh(ctlTree *browser, const wxTreeItemId item)
+pgObject* pgTable::Refresh(ctlTree* browser, const wxTreeItemId item)
 {
-	pgTable *table = 0;
-	pgCollection *coll = browser->GetParentCollection(item);
+	pgTable* table = 0;
+	pgCollection* coll = browser->GetParentCollection(item);
 	if (coll)
-		table = (pgTable *)tableFactory.CreateObjects(coll, 0, wxT("\n   AND rel.oid=") + GetOidStr());
+		table = (pgTable*)tableFactory.CreateObjects(coll, 0, wxT("\n   AND rel.oid=") + GetOidStr());
 
 	return table;
 }
@@ -1177,16 +1177,16 @@ bool pgTable::HasPgstattuple()
 	return GetConnection()->HasFeature(FEATURE_PGSTATTUPLE);
 }
 
-void pgTable::iSetTriggersEnabled(ctlTree *browser, bool enable)
+void pgTable::iSetTriggersEnabled(ctlTree* browser, bool enable)
 {
-	pgCollection *triggers = browser->FindCollection(triggerFactory, GetId());
+	pgCollection* triggers = browser->FindCollection(triggerFactory, GetId());
 	if (triggers)
 	{
 		triggers->ShowTreeDetail(browser);
 		treeObjectIterator trgIt(browser, triggers);
 
-		pgTrigger *trigger;
-		while ((trigger = (pgTrigger *)trgIt.GetNextObject()) != 0)
+		pgTrigger* trigger;
+		while ((trigger = (pgTrigger*)trgIt.GetNextObject()) != 0)
 		{
 			trigger->SetEnabled(browser, enable);
 		}
@@ -1196,7 +1196,7 @@ void pgTable::iSetTriggersEnabled(ctlTree *browser, bool enable)
 ///////////////////////////////////////////////////////////
 
 
-pgTableCollection::pgTableCollection(pgaFactory *factory, pgSchema *sch)
+pgTableCollection::pgTableCollection(pgaFactory* factory, pgSchema* sch)
 	: pgSchemaObjCollection(factory, sch)
 {
 }
@@ -1232,7 +1232,7 @@ wxString pgTableCollection::GetTranslatedMessage(int kindOfMessage) const
 }
 
 
-void pgTableCollection::ShowStatistics(frmMain *form, ctlListView *statistics)
+void pgTableCollection::ShowStatistics(frmMain* form, ctlListView* statistics)
 {
 	wxLogInfo(wxT("Displaying statistics for tables on %s"), GetSchema()->GetIdentifier().c_str());
 
@@ -1276,15 +1276,15 @@ void pgTableCollection::ShowStatistics(frmMain *form, ctlListView *statistics)
 		sql += wxT(", vacuum_count, autovacuum_count, analyze_count, autoanalyze_count");
 	if (hasSize)
 		sql += wxT(", pg_size_pretty(pg_relation_size(st.relid)")
-		       wxT(" + CASE WHEN cl.reltoastrelid = 0 THEN 0 ELSE pg_relation_size(cl.reltoastrelid) + COALESCE((SELECT SUM(pg_relation_size(indexrelid)) FROM pg_index WHERE indrelid=cl.reltoastrelid)::int8, 0) END")
-		       wxT(" + COALESCE((SELECT SUM(pg_relation_size(indexrelid)) FROM pg_index WHERE indrelid=st.relid)::int8, 0)) AS size");
+		wxT(" + CASE WHEN cl.reltoastrelid = 0 THEN 0 ELSE pg_relation_size(cl.reltoastrelid) + COALESCE((SELECT SUM(pg_relation_size(indexrelid)) FROM pg_index WHERE indrelid=cl.reltoastrelid)::int8, 0) END")
+		wxT(" + COALESCE((SELECT SUM(pg_relation_size(indexrelid)) FROM pg_index WHERE indrelid=st.relid)::int8, 0)) AS size");
 
 	sql += wxT("\n  FROM pg_stat_all_tables st")
-	       wxT("  JOIN pg_class cl on cl.oid=st.relid\n")
-	       wxT(" WHERE schemaname = ") + qtDbString(GetSchema()->GetName())
-	       +  wxT("\n ORDER BY relname");
+		wxT("  JOIN pg_class cl on cl.oid=st.relid\n")
+		wxT(" WHERE schemaname = ") + qtDbString(GetSchema()->GetName())
+		+ wxT("\n ORDER BY relname");
 
-	pgSet *stats = GetDatabase()->ExecuteSet(sql);
+	pgSet* stats = GetDatabase()->ExecuteSet(sql);
 
 	if (stats)
 	{
@@ -1332,91 +1332,91 @@ void pgTableCollection::ShowStatistics(frmMain *form, ctlListView *statistics)
 ///////////////////////////////////////////////////////////
 
 
-void pgTable::ShowStatistics(frmMain *form, ctlListView *statistics)
+void pgTable::ShowStatistics(frmMain* form, ctlListView* statistics)
 {
 	wxString sql =
-	    wxT("SELECT seq_scan AS ") + qtIdent(_("Sequential Scans")) +
-	    wxT(", seq_tup_read AS ") + qtIdent(_("Sequential Tuples Read")) +
-	    wxT(", idx_scan AS ") + qtIdent(_("Index Scans")) +
-	    wxT(", idx_tup_fetch AS ") + qtIdent(_("Index Tuples Fetched")) +
-	    wxT(", n_tup_ins AS ") + qtIdent(_("Tuples Inserted")) +
-	    wxT(", n_tup_upd AS ") + qtIdent(_("Tuples Updated")) +
-	    wxT(", n_tup_del AS ") + qtIdent(_("Tuples Deleted"));
+		wxT("SELECT seq_scan AS ") + qtIdent(_("Sequential Scans")) +
+		wxT(", seq_tup_read AS ") + qtIdent(_("Sequential Tuples Read")) +
+		wxT(", idx_scan AS ") + qtIdent(_("Index Scans")) +
+		wxT(", idx_tup_fetch AS ") + qtIdent(_("Index Tuples Fetched")) +
+		wxT(", n_tup_ins AS ") + qtIdent(_("Tuples Inserted")) +
+		wxT(", n_tup_upd AS ") + qtIdent(_("Tuples Updated")) +
+		wxT(", n_tup_del AS ") + qtIdent(_("Tuples Deleted"));
 
 	if (GetConnection()->BackendMinimumVersion(8, 3))
 	{
 		sql +=
-		    wxT(", n_tup_hot_upd AS ") + qtIdent(_("Tuples HOT Updated")) +
-		    wxT(", n_live_tup AS ") + qtIdent(_("Live Tuples")) +
-		    wxT(", n_dead_tup AS ") + qtIdent(_("Dead Tuples"));
+			wxT(", n_tup_hot_upd AS ") + qtIdent(_("Tuples HOT Updated")) +
+			wxT(", n_live_tup AS ") + qtIdent(_("Live Tuples")) +
+			wxT(", n_dead_tup AS ") + qtIdent(_("Dead Tuples"));
 	}
 
-	sql +=   wxT(", heap_blks_read AS ") + qtIdent(_("Heap Blocks Read")) +
-	         wxT(", heap_blks_hit AS ") + qtIdent(_("Heap Blocks Hit")) +
-	         wxT(", idx_blks_read AS ") + qtIdent(_("Index Blocks Read")) +
-	         wxT(", idx_blks_hit AS ") + qtIdent(_("Index Blocks Hit")) +
-	         wxT(", toast_blks_read AS ") + qtIdent(_("Toast Blocks Read")) +
-	         wxT(", toast_blks_hit AS ") + qtIdent(_("Toast Blocks Hit")) +
-	         wxT(", tidx_blks_read AS ") + qtIdent(_("Toast Index Blocks Read")) +
-	         wxT(", tidx_blks_hit AS ") + qtIdent(_("Toast Index Blocks Hit"));
+	sql += wxT(", heap_blks_read AS ") + qtIdent(_("Heap Blocks Read")) +
+		wxT(", heap_blks_hit AS ") + qtIdent(_("Heap Blocks Hit")) +
+		wxT(", idx_blks_read AS ") + qtIdent(_("Index Blocks Read")) +
+		wxT(", idx_blks_hit AS ") + qtIdent(_("Index Blocks Hit")) +
+		wxT(", toast_blks_read AS ") + qtIdent(_("Toast Blocks Read")) +
+		wxT(", toast_blks_hit AS ") + qtIdent(_("Toast Blocks Hit")) +
+		wxT(", tidx_blks_read AS ") + qtIdent(_("Toast Index Blocks Read")) +
+		wxT(", tidx_blks_hit AS ") + qtIdent(_("Toast Index Blocks Hit"));
 
 	if (GetConnection()->BackendMinimumVersion(8, 2))
 	{
 		sql +=
-		    wxT(", last_vacuum AS ") + qtIdent(_("Last Vacuum")) +
-		    wxT(", last_autovacuum AS ") + qtIdent(_("Last Autovacuum")) +
-		    wxT(", last_analyze AS ") + qtIdent(_("Last Analyze")) +
-		    wxT(", last_autoanalyze AS ") + qtIdent(_("Last Autoanalyze"));
+			wxT(", last_vacuum AS ") + qtIdent(_("Last Vacuum")) +
+			wxT(", last_autovacuum AS ") + qtIdent(_("Last Autovacuum")) +
+			wxT(", last_analyze AS ") + qtIdent(_("Last Analyze")) +
+			wxT(", last_autoanalyze AS ") + qtIdent(_("Last Autoanalyze"));
 	}
 
 	if (GetConnection()->BackendMinimumVersion(9, 1))
 	{
 		sql +=
-		    wxT(", vacuum_count AS ") + qtIdent(_("Vacuum counter")) +
-		    wxT(", autovacuum_count AS ") + qtIdent(_("Autovacuum counter")) +
-		    wxT(", analyze_count AS ") + qtIdent(_("Analyze counter")) +
-		    wxT(", autoanalyze_count AS ") + qtIdent(_("Autoanalyze counter"));
+			wxT(", vacuum_count AS ") + qtIdent(_("Vacuum counter")) +
+			wxT(", autovacuum_count AS ") + qtIdent(_("Autovacuum counter")) +
+			wxT(", analyze_count AS ") + qtIdent(_("Analyze counter")) +
+			wxT(", autoanalyze_count AS ") + qtIdent(_("Autoanalyze counter"));
 	}
 
 	if (GetConnection()->HasFeature(FEATURE_SIZE))
 	{
 		sql += wxT(", pg_size_pretty(pg_relation_size(stat.relid)) AS ") + qtIdent(_("Table Size"))
-		       +  wxT(", CASE WHEN cl.reltoastrelid = 0 THEN ") + qtDbString(_("none")) + wxT(" ELSE pg_size_pretty(pg_relation_size(cl.reltoastrelid)+ COALESCE((SELECT SUM(pg_relation_size(indexrelid)) FROM pg_index WHERE indrelid=cl.reltoastrelid)::int8, 0)) END AS ") + qtIdent(_("Toast Table Size"))
-		       +  wxT(", pg_size_pretty(COALESCE((SELECT SUM(pg_relation_size(indexrelid)) FROM pg_index WHERE indrelid=stat.relid)::int8, 0)) AS ") + qtIdent(_("Indexes Size"));
+			+ wxT(", CASE WHEN cl.reltoastrelid = 0 THEN ") + qtDbString(_("none")) + wxT(" ELSE pg_size_pretty(pg_relation_size(cl.reltoastrelid)+ COALESCE((SELECT SUM(pg_relation_size(indexrelid)) FROM pg_index WHERE indrelid=cl.reltoastrelid)::int8, 0)) END AS ") + qtIdent(_("Toast Table Size"))
+			+ wxT(", pg_size_pretty(COALESCE((SELECT SUM(pg_relation_size(indexrelid)) FROM pg_index WHERE indrelid=stat.relid)::int8, 0)) AS ") + qtIdent(_("Indexes Size"));
 	}
 
 	if (showExtendedStatistics)
 	{
 		sql += wxT("\n")
-		       wxT(", tuple_count AS ") + qtIdent(_("Tuple Count")) + wxT(",\n")
-		       wxT("  pg_size_pretty(tuple_len) AS ") + qtIdent(_("Tuple Length")) + wxT(",\n")
-		       wxT("  tuple_percent AS ") + qtIdent(_("Tuple Percent")) + wxT(",\n")
-		       wxT("  dead_tuple_count AS ") + qtIdent(_("Dead Tuple Count")) + wxT(",\n")
-		       wxT("  pg_size_pretty(dead_tuple_len) AS ") + qtIdent(_("Dead Tuple Length")) + wxT(",\n")
-		       wxT("  dead_tuple_percent AS ") + qtIdent(_("Dead Tuple Percent")) + wxT(",\n")
-		       wxT("  pg_size_pretty(free_space) AS ") + qtIdent(_("Free Space")) + wxT(",\n")
-		       wxT("  free_percent AS ") + qtIdent(_("Free Percent")) + wxT("\n")
-		       wxT("  FROM pgstattuple('") + GetQuotedFullIdentifier() + wxT("'), pg_stat_all_tables stat");
+			wxT(", tuple_count AS ") + qtIdent(_("Tuple Count")) + wxT(",\n")
+			wxT("  pg_size_pretty(tuple_len) AS ") + qtIdent(_("Tuple Length")) + wxT(",\n")
+			wxT("  tuple_percent AS ") + qtIdent(_("Tuple Percent")) + wxT(",\n")
+			wxT("  dead_tuple_count AS ") + qtIdent(_("Dead Tuple Count")) + wxT(",\n")
+			wxT("  pg_size_pretty(dead_tuple_len) AS ") + qtIdent(_("Dead Tuple Length")) + wxT(",\n")
+			wxT("  dead_tuple_percent AS ") + qtIdent(_("Dead Tuple Percent")) + wxT(",\n")
+			wxT("  pg_size_pretty(free_space) AS ") + qtIdent(_("Free Space")) + wxT(",\n")
+			wxT("  free_percent AS ") + qtIdent(_("Free Percent")) + wxT("\n")
+			wxT("  FROM pgstattuple('") + GetQuotedFullIdentifier() + wxT("'), pg_stat_all_tables stat");
 	}
 	else
 	{
 		sql += wxT("\n")
-		       wxT("  FROM pg_stat_all_tables stat");
+			wxT("  FROM pg_stat_all_tables stat");
 	}
-	sql +=  wxT("\n")
-	        wxT("  JOIN pg_statio_all_tables statio ON stat.relid = statio.relid\n")
-	        wxT("  JOIN pg_class cl ON cl.oid=stat.relid\n")
-	        wxT(" WHERE stat.relid = ") + GetOidStr();
+	sql += wxT("\n")
+		wxT("  JOIN pg_statio_all_tables statio ON stat.relid = statio.relid\n")
+		wxT("  JOIN pg_class cl ON cl.oid=stat.relid\n")
+		wxT(" WHERE stat.relid = ") + GetOidStr();
 
 
 	DisplayStatistics(statistics, sql);
 }
 
 
-pgObject *pgTableFactory::CreateObjects(pgCollection *collection, ctlTree *browser, const wxString &restriction)
+pgObject* pgTableFactory::CreateObjects(pgCollection* collection, ctlTree* browser, const wxString& restriction)
 {
 	wxString query;
-	pgTable *table = 0;
+	pgTable* table = 0;
 
 	// Greenplum returns reltuples and relpages as tuples per segmentDB and pages per segmentDB,
 	// so we need to multiply them by the number of segmentDBs to get reasonable values.
@@ -1429,25 +1429,85 @@ pgObject *pgTableFactory::CreateObjects(pgCollection *collection, ctlTree *brows
 			gp_segments = 1;
 	}
 
-	pgSet *tables;
-	if (collection->GetConnection()->BackendMinimumVersion(8, 0))
+	pgSet* tables;
+	//bega 20220501
+	if (collection->GetConnection()->BackendMaximumVersion(11, 0))
 	{
 		query = wxT("SELECT rel.oid, rel.relname, rel.reltablespace AS spcoid, spc.spcname, pg_get_userbyid(rel.relowner) AS relowner, rel.relacl, rel.relhasoids, ")
-		        wxT("rel.relhassubclass, rel.reltuples, des.description, con.conname, con.conkey,\n")
-		        wxT("       EXISTS(select 1 FROM pg_trigger\n")
-		        wxT("                       JOIN pg_proc pt ON pt.oid=tgfoid AND pt.proname='logtrigger'\n")
-		        wxT("                       JOIN pg_proc pc ON pc.pronamespace=pt.pronamespace AND pc.proname='slonyversion'\n")
-		        wxT("                     WHERE tgrelid=rel.oid) AS isrepl,\n");
+			wxT("rel.relhassubclass, rel.reltuples, des.description, con.conname, con.conkey,\n")
+			wxT("       EXISTS(select 1 FROM pg_trigger\n")
+			wxT("                       JOIN pg_proc pt ON pt.oid=tgfoid AND pt.proname='logtrigger'\n")
+			wxT("                       JOIN pg_proc pc ON pc.pronamespace=pt.pronamespace AND pc.proname='slonyversion'\n")
+			wxT("                     WHERE tgrelid=rel.oid) AS isrepl,\n");		
+	}
+	else
+	{
+		query = wxT("SELECT rel.oid, rel.relname, rel.reltablespace AS spcoid, spc.spcname, pg_get_userbyid(rel.relowner) AS relowner, rel.relacl,  ")
+			wxT("rel.relhassubclass, rel.reltuples, des.description, con.conname, con.conkey,\n")
+			wxT("       EXISTS(select 1 FROM pg_trigger\n")
+			wxT("                       JOIN pg_proc pt ON pt.oid=tgfoid AND pt.proname='logtrigger'\n")
+			wxT("                       JOIN pg_proc pc ON pc.pronamespace=pt.pronamespace AND pc.proname='slonyversion'\n")
+			wxT("                     WHERE tgrelid=rel.oid) AS isrepl,\n");
+	}
+	query += wxT("       (select count(*) FROM pg_trigger\n")
+		wxT("                     WHERE tgrelid=rel.oid AND tgisinternal = FALSE) AS triggercount\n");
+	query += wxT(", rel.relpersistence \n");
+	query += wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'fillfactor=([0-9]*)') AS fillfactor \n");
+	query += wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_enabled=([a-z|0-9]*)') AS autovacuum_enabled \n")
+		wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_threshold=([0-9]*)') AS autovacuum_vacuum_threshold \n")
+		wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_scale_factor=([0-9]*[.][0-9]*)') AS autovacuum_vacuum_scale_factor \n")
+		wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_analyze_threshold=([0-9]*)') AS autovacuum_analyze_threshold \n")
+		wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_analyze_scale_factor=([0-9]*[.][0-9]*)') AS autovacuum_analyze_scale_factor \n")
+		wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_cost_delay=([0-9]*)') AS autovacuum_vacuum_cost_delay \n")
+		wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_cost_limit=([0-9]*)') AS autovacuum_vacuum_cost_limit \n")
+		wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_min_age=([0-9]*)') AS autovacuum_freeze_min_age \n")
+		wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_max_age=([0-9]*)') AS autovacuum_freeze_max_age \n")
+		wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_table_age=([0-9]*)') AS autovacuum_freeze_table_age \n")
+		wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_enabled=([a-z|0-9]*)') AS toast_autovacuum_enabled \n")
+		wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_threshold=([0-9]*)') AS toast_autovacuum_vacuum_threshold \n")
+		wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_scale_factor=([0-9]*[.][0-9]*)') AS toast_autovacuum_vacuum_scale_factor \n")
+		wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_analyze_threshold=([0-9]*)') AS toast_autovacuum_analyze_threshold \n")
+		wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_analyze_scale_factor=([0-9]*[.][0-9]*)') AS toast_autovacuum_analyze_scale_factor \n")
+		wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_cost_delay=([0-9]*)') AS toast_autovacuum_vacuum_cost_delay \n")
+		wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_cost_limit=([0-9]*)') AS toast_autovacuum_vacuum_cost_limit \n")
+		wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_min_age=([0-9]*)') AS toast_autovacuum_freeze_min_age \n")
+		wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_max_age=([0-9]*)') AS toast_autovacuum_freeze_max_age \n")
+		wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_table_age=([0-9]*)') AS toast_autovacuum_freeze_table_age \n")
+		wxT(", rel.reloptions AS reloptions, tst.reloptions AS toast_reloptions \n")
+		wxT(", (CASE WHEN rel.reltoastrelid = 0 THEN false ELSE true END) AS hastoasttable\n");
+	query += wxT(", rel.reloftype, typ.typname\n");
+	query += wxT(",\n(SELECT array_agg(label) FROM pg_seclabels sl1 WHERE sl1.objoid=rel.oid AND sl1.objsubid=0) AS labels");
+	query += wxT(",\n(SELECT array_agg(provider) FROM pg_seclabels sl2 WHERE sl2.objoid=rel.oid AND sl2.objsubid=0) AS providers");
+	query += wxT("  FROM pg_class rel\n")
+		wxT("  LEFT OUTER JOIN pg_tablespace spc on spc.oid=rel.reltablespace\n")
+		wxT("  LEFT OUTER JOIN pg_description des ON (des.objoid=rel.oid AND des.objsubid=0 AND des.classoid='pg_class'::regclass)\n")
+		wxT("  LEFT OUTER JOIN pg_constraint con ON con.conrelid=rel.oid AND con.contype='p'\n");
+	query += wxT("  LEFT OUTER JOIN pg_class tst ON tst.oid = rel.reltoastrelid\n");
+	query += wxT("LEFT JOIN pg_type typ ON rel.reloftype=typ.oid\n");
+	query += wxT(" WHERE rel.relkind IN ('r','s','t') AND rel.relnamespace = ") + collection->GetSchema()->GetOidStr() + wxT("\n");
+	query += restriction +
+		wxT(" ORDER BY rel.relname");
+
+
+
+	/*if (collection->GetConnection()->BackendMinimumVersion(8, 0))
+	{
+		query = wxT("SELECT rel.oid, rel.relname, rel.reltablespace AS spcoid, spc.spcname, pg_get_userbyid(rel.relowner) AS relowner, rel.relacl, rel.relhasoids, ")
+			wxT("rel.relhassubclass, rel.reltuples, des.description, con.conname, con.conkey,\n")
+			wxT("       EXISTS(select 1 FROM pg_trigger\n")
+			wxT("                       JOIN pg_proc pt ON pt.oid=tgfoid AND pt.proname='logtrigger'\n")
+			wxT("                       JOIN pg_proc pc ON pc.pronamespace=pt.pronamespace AND pc.proname='slonyversion'\n")
+			wxT("                     WHERE tgrelid=rel.oid) AS isrepl,\n");
 
 		if (collection->GetConnection()->BackendMinimumVersion(9, 0))
 		{
 			query += wxT("       (select count(*) FROM pg_trigger\n")
-			         wxT("                     WHERE tgrelid=rel.oid AND tgisinternal = FALSE) AS triggercount\n");
+				wxT("                     WHERE tgrelid=rel.oid AND tgisinternal = FALSE) AS triggercount\n");
 		}
 		else
 		{
 			query += wxT("       (select count(*) FROM pg_trigger\n")
-			         wxT("                     WHERE tgrelid=rel.oid AND tgisconstraint = FALSE) AS triggercount\n");
+				wxT("                     WHERE tgrelid=rel.oid AND tgisconstraint = FALSE) AS triggercount\n");
 		}
 
 		if (collection->GetConnection()->BackendMinimumVersion(9, 1))
@@ -1469,27 +1529,27 @@ pgObject *pgTableFactory::CreateObjects(pgCollection *collection, ctlTree *brows
 		else if (collection->GetConnection()->BackendMinimumVersion(8, 4))
 		{
 			query += wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_enabled=([a-z|0-9]*)') AS autovacuum_enabled \n")
-			         wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_threshold=([0-9]*)') AS autovacuum_vacuum_threshold \n")
-			         wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_scale_factor=([0-9]*[.][0-9]*)') AS autovacuum_vacuum_scale_factor \n")
-			         wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_analyze_threshold=([0-9]*)') AS autovacuum_analyze_threshold \n")
-			         wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_analyze_scale_factor=([0-9]*[.][0-9]*)') AS autovacuum_analyze_scale_factor \n")
-			         wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_cost_delay=([0-9]*)') AS autovacuum_vacuum_cost_delay \n")
-			         wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_cost_limit=([0-9]*)') AS autovacuum_vacuum_cost_limit \n")
-			         wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_min_age=([0-9]*)') AS autovacuum_freeze_min_age \n")
-			         wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_max_age=([0-9]*)') AS autovacuum_freeze_max_age \n")
-			         wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_table_age=([0-9]*)') AS autovacuum_freeze_table_age \n")
-			         wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_enabled=([a-z|0-9]*)') AS toast_autovacuum_enabled \n")
-			         wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_threshold=([0-9]*)') AS toast_autovacuum_vacuum_threshold \n")
-			         wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_scale_factor=([0-9]*[.][0-9]*)') AS toast_autovacuum_vacuum_scale_factor \n")
-			         wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_analyze_threshold=([0-9]*)') AS toast_autovacuum_analyze_threshold \n")
-			         wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_analyze_scale_factor=([0-9]*[.][0-9]*)') AS toast_autovacuum_analyze_scale_factor \n")
-			         wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_cost_delay=([0-9]*)') AS toast_autovacuum_vacuum_cost_delay \n")
-			         wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_cost_limit=([0-9]*)') AS toast_autovacuum_vacuum_cost_limit \n")
-			         wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_min_age=([0-9]*)') AS toast_autovacuum_freeze_min_age \n")
-			         wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_max_age=([0-9]*)') AS toast_autovacuum_freeze_max_age \n")
-			         wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_table_age=([0-9]*)') AS toast_autovacuum_freeze_table_age \n")
-			         wxT(", rel.reloptions AS reloptions, tst.reloptions AS toast_reloptions \n")
-			         wxT(", (CASE WHEN rel.reltoastrelid = 0 THEN false ELSE true END) AS hastoasttable\n");
+				wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_threshold=([0-9]*)') AS autovacuum_vacuum_threshold \n")
+				wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_scale_factor=([0-9]*[.][0-9]*)') AS autovacuum_vacuum_scale_factor \n")
+				wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_analyze_threshold=([0-9]*)') AS autovacuum_analyze_threshold \n")
+				wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_analyze_scale_factor=([0-9]*[.][0-9]*)') AS autovacuum_analyze_scale_factor \n")
+				wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_cost_delay=([0-9]*)') AS autovacuum_vacuum_cost_delay \n")
+				wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_cost_limit=([0-9]*)') AS autovacuum_vacuum_cost_limit \n")
+				wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_min_age=([0-9]*)') AS autovacuum_freeze_min_age \n")
+				wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_max_age=([0-9]*)') AS autovacuum_freeze_max_age \n")
+				wxT(", substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_table_age=([0-9]*)') AS autovacuum_freeze_table_age \n")
+				wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_enabled=([a-z|0-9]*)') AS toast_autovacuum_enabled \n")
+				wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_threshold=([0-9]*)') AS toast_autovacuum_vacuum_threshold \n")
+				wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_scale_factor=([0-9]*[.][0-9]*)') AS toast_autovacuum_vacuum_scale_factor \n")
+				wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_analyze_threshold=([0-9]*)') AS toast_autovacuum_analyze_threshold \n")
+				wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_analyze_scale_factor=([0-9]*[.][0-9]*)') AS toast_autovacuum_analyze_scale_factor \n")
+				wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_cost_delay=([0-9]*)') AS toast_autovacuum_vacuum_cost_delay \n")
+				wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_cost_limit=([0-9]*)') AS toast_autovacuum_vacuum_cost_limit \n")
+				wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_min_age=([0-9]*)') AS toast_autovacuum_freeze_min_age \n")
+				wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_max_age=([0-9]*)') AS toast_autovacuum_freeze_max_age \n")
+				wxT(", substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_table_age=([0-9]*)') AS toast_autovacuum_freeze_table_age \n")
+				wxT(", rel.reloptions AS reloptions, tst.reloptions AS toast_reloptions \n")
+				wxT(", (CASE WHEN rel.reltoastrelid = 0 THEN false ELSE true END) AS hastoasttable\n");
 		}
 		if (collection->GetConnection()->BackendMinimumVersion(9, 0))
 			query += wxT(", rel.reloftype, typ.typname\n");
@@ -1500,9 +1560,9 @@ pgObject *pgTableFactory::CreateObjects(pgCollection *collection, ctlTree *brows
 		}
 
 		query += wxT("  FROM pg_class rel\n")
-		         wxT("  LEFT OUTER JOIN pg_tablespace spc on spc.oid=rel.reltablespace\n")
-		         wxT("  LEFT OUTER JOIN pg_description des ON (des.objoid=rel.oid AND des.objsubid=0 AND des.classoid='pg_class'::regclass)\n")
-		         wxT("  LEFT OUTER JOIN pg_constraint con ON con.conrelid=rel.oid AND con.contype='p'\n");
+			wxT("  LEFT OUTER JOIN pg_tablespace spc on spc.oid=rel.reltablespace\n")
+			wxT("  LEFT OUTER JOIN pg_description des ON (des.objoid=rel.oid AND des.objsubid=0 AND des.classoid='pg_class'::regclass)\n")
+			wxT("  LEFT OUTER JOIN pg_constraint con ON con.conrelid=rel.oid AND con.contype='p'\n");
 
 		// Add the toast table for vacuum parameters.
 		if (collection->GetConnection()->BackendMinimumVersion(8, 4))
@@ -1522,25 +1582,30 @@ pgObject *pgTableFactory::CreateObjects(pgCollection *collection, ctlTree *brows
 			query += wxT("AND rel.relstorage <> 'x' AND rel.oid NOT IN (SELECT parchildrelid from pg_partition_rule)");
 
 		query += restriction +
-		         wxT(" ORDER BY rel.relname");
+			wxT(" ORDER BY rel.relname");
 	}
 	else
 	{
+
 		query = wxT("SELECT rel.oid, rel.relname, pg_get_userbyid(rel.relowner) AS relowner, rel.relacl, rel.relhasoids, ")
-		        wxT("rel.relhassubclass, rel.reltuples, des.description, con.conname, con.conkey,\n")
-		        wxT("       (select count(*) FROM pg_trigger\n")
-		        wxT("                     WHERE tgrelid=rel.oid AND tgisconstraint = FALSE) AS triggercount,\n")
-		        wxT("       EXISTS(select 1 FROM pg_trigger\n")
-		        wxT("                       JOIN pg_proc pt ON pt.oid=tgfoid AND pt.proname='logtrigger'\n")
-		        wxT("                       JOIN pg_proc pc ON pc.pronamespace=pt.pronamespace AND pc.proname='slonyversion'\n")
-		        wxT("                     WHERE tgrelid=rel.oid) AS isrepl\n")
-		        wxT("  FROM pg_class rel\n")
-		        wxT("  LEFT OUTER JOIN pg_description des ON (des.objoid=rel.oid AND des.objsubid=0 AND des.classoid='pg_class'::regclass)\n")
-		        wxT("  LEFT OUTER JOIN pg_constraint con ON con.conrelid=rel.oid AND con.contype='p'\n")
-		        wxT(" WHERE rel.relkind IN ('r','s','t') AND rel.relnamespace = ") + collection->GetSchema()->GetOidStr() + wxT("\n")
-		        + restriction +
-		        wxT(" ORDER BY rel.relname");
+			wxT("rel.relhassubclass, rel.reltuples, des.description, con.conname, con.conkey,\n")
+			wxT("       (select count(*) FROM pg_trigger\n")
+			wxT("                     WHERE tgrelid=rel.oid AND tgisconstraint = FALSE) AS triggercount,\n")
+			wxT("       EXISTS(select 1 FROM pg_trigger\n")
+			wxT("                       JOIN pg_proc pt ON pt.oid=tgfoid AND pt.proname='logtrigger'\n")
+			wxT("                       JOIN pg_proc pc ON pc.pronamespace=pt.pronamespace AND pc.proname='slonyversion'\n")
+			wxT("                     WHERE tgrelid=rel.oid) AS isrepl\n")
+			wxT("  FROM pg_class rel\n")
+			wxT("  LEFT OUTER JOIN pg_description des ON (des.objoid=rel.oid AND des.objsubid=0 AND des.classoid='pg_class'::regclass)\n")
+			wxT("  LEFT OUTER JOIN pg_constraint con ON con.conrelid=rel.oid AND con.contype='p'\n")
+			wxT(" WHERE rel.relkind IN ('r','s','t') AND rel.relnamespace = ") + collection->GetSchema()->GetOidStr() + wxT("\n")
+			+ restriction +
+			wxT(" ORDER BY rel.relname");
+
 	}
+	*/
+
+
 	tables = collection->GetDatabase()->ExecuteSet(query);
 	if (tables)
 	{
@@ -1578,7 +1643,8 @@ pgObject *pgTableFactory::CreateObjects(pgCollection *collection, ctlTree *brows
 				table->iSetUnlogged(tables->GetVal(wxT("relpersistence")) == wxT("u"));
 			else
 				table->iSetUnlogged(false);
-			table->iSetHasOids(tables->GetBool(wxT("relhasoids")));
+			if(collection->GetConnection()->BackendMaximumVersion(11, 0))
+				table->iSetHasOids(tables->GetBool(wxT("relhasoids")));
 			table->iSetEstimatedRows(tables->GetDouble(wxT("reltuples")) * gp_segments);
 			if (collection->GetConnection()->BackendMinimumVersion(8, 2))
 			{
@@ -1708,32 +1774,32 @@ pgTableFactory::pgTableFactory()
 		replicatedIconId = addIcon(table_repl_png_img);
 }
 
-pgCollection *pgTableFactory::CreateCollection(pgObject *obj)
+pgCollection* pgTableFactory::CreateCollection(pgObject* obj)
 {
-	return new pgTableCollection(GetCollectionFactory(), (pgSchema *)obj);
+	return new pgTableCollection(GetCollectionFactory(), (pgSchema*)obj);
 }
 
 pgTableFactory tableFactory;
 static pgaCollectionFactory cf(&tableFactory, __("Tables"), tables_png_img);
 
 
-pgCollection *pgTableObjFactory::CreateCollection(pgObject *obj)
+pgCollection* pgTableObjFactory::CreateCollection(pgObject* obj)
 {
-	return new pgTableObjCollection(GetCollectionFactory(), (pgTable *)obj);
+	return new pgTableObjCollection(GetCollectionFactory(), (pgTable*)obj);
 }
 
 
-countRowsFactory::countRowsFactory(menuFactoryList *list, wxMenu *mnu, ctlMenuToolbar *toolbar) : contextActionFactory(list)
+countRowsFactory::countRowsFactory(menuFactoryList* list, wxMenu* mnu, ctlMenuToolbar* toolbar) : contextActionFactory(list)
 {
 	mnu->Append(id, _("&Count"), _("Count rows in the selected object."));
 }
 
 
-wxWindow *countRowsFactory::StartDialog(frmMain *form, pgObject *obj)
+wxWindow* countRowsFactory::StartDialog(frmMain* form, pgObject* obj)
 {
 	form->StartMsg(_("Counting rows"));
 
-	((pgTable *)obj)->UpdateRows();
+	((pgTable*)obj)->UpdateRows();
 
 	wxTreeItemId item = form->GetBrowser()->GetSelection();
 	if (obj == form->GetBrowser()->GetObject(item))
@@ -1745,115 +1811,115 @@ wxWindow *countRowsFactory::StartDialog(frmMain *form, pgObject *obj)
 }
 
 
-bool countRowsFactory::CheckEnable(pgObject *obj)
+bool countRowsFactory::CheckEnable(pgObject* obj)
 {
 	return obj && obj->IsCreatedBy(tableFactory);
 }
 
 
-executePgstattupleFactory::executePgstattupleFactory(menuFactoryList *list, wxMenu *mnu, ctlMenuToolbar *toolbar) : contextActionFactory(list)
+executePgstattupleFactory::executePgstattupleFactory(menuFactoryList* list, wxMenu* mnu, ctlMenuToolbar* toolbar) : contextActionFactory(list)
 {
 	mnu->Append(id, _("&Extended table statistics"), _("Get extended statistics via pgstattuple for the selected object."), wxITEM_CHECK);
 }
 
 
-wxWindow *executePgstattupleFactory::StartDialog(frmMain *form, pgObject *obj)
+wxWindow* executePgstattupleFactory::StartDialog(frmMain* form, pgObject* obj)
 {
-	if (!((pgTable *)obj)->GetShowExtendedStatistics())
+	if (!((pgTable*)obj)->GetShowExtendedStatistics())
 	{
-		((pgTable *)obj)->iSetShowExtendedStatistics(true);
+		((pgTable*)obj)->iSetShowExtendedStatistics(true);
 		wxTreeItemId item = form->GetBrowser()->GetSelection();
 		if (obj == form->GetBrowser()->GetObject(item))
 			form->SelectStatisticsTab();
 	}
 	else
-		((pgTable *)obj)->iSetShowExtendedStatistics(false);
+		((pgTable*)obj)->iSetShowExtendedStatistics(false);
 
-	form->GetMenuFactories()->CheckMenu(obj, form->GetMenuBar(), (ctlMenuToolbar *)form->GetToolBar());
+	form->GetMenuFactories()->CheckMenu(obj, form->GetMenuBar(), (ctlMenuToolbar*)form->GetToolBar());
 
 	return 0;
 }
 
 
-bool executePgstattupleFactory::CheckEnable(pgObject *obj)
+bool executePgstattupleFactory::CheckEnable(pgObject* obj)
 {
-	return obj && obj->IsCreatedBy(tableFactory) && ((pgTable *)obj)->HasPgstattuple();
+	return obj && obj->IsCreatedBy(tableFactory) && ((pgTable*)obj)->HasPgstattuple();
 }
 
-bool executePgstattupleFactory::CheckChecked(pgObject *obj)
+bool executePgstattupleFactory::CheckChecked(pgObject* obj)
 {
-	return obj && obj->IsCreatedBy(tableFactory) && ((pgTable *)obj)->GetShowExtendedStatistics();
+	return obj && obj->IsCreatedBy(tableFactory) && ((pgTable*)obj)->GetShowExtendedStatistics();
 }
 
-disableAllTriggersFactory::disableAllTriggersFactory(menuFactoryList *list, wxMenu *mnu, ctlMenuToolbar *toolbar) : contextActionFactory(list)
+disableAllTriggersFactory::disableAllTriggersFactory(menuFactoryList* list, wxMenu* mnu, ctlMenuToolbar* toolbar) : contextActionFactory(list)
 {
 	mnu->Append(id, _("Disable triggers"), _("Disable all triggers on the selected table."));
 }
 
 
-wxWindow *disableAllTriggersFactory::StartDialog(frmMain *form, pgObject *obj)
+wxWindow* disableAllTriggersFactory::StartDialog(frmMain* form, pgObject* obj)
 {
 	if (wxMessageBox(_("Are you sure you wish to disable all triggers on this table?"), _("Disable triggers"), wxYES_NO) != wxYES)
 		return 0;
 
-	if (!((pgTable *)obj)->EnableTriggers(false))
+	if (!((pgTable*)obj)->EnableTriggers(false))
 		return 0;
 
-	((pgTable *)obj)->iSetTriggersEnabled(form->GetBrowser(), false);
+	((pgTable*)obj)->iSetTriggersEnabled(form->GetBrowser(), false);
 
 	return 0;
 }
 
 
-bool disableAllTriggersFactory::CheckEnable(pgObject *obj)
+bool disableAllTriggersFactory::CheckEnable(pgObject* obj)
 {
 	return obj && obj->IsCreatedBy(tableFactory) && obj->CanEdit()
-	       && (obj->GetOwner() == obj->GetConnection()->GetUser() || obj->GetServer()->GetSuperUser())
-	       && ((pgTable *)obj)->GetConnection()->BackendMinimumVersion(8, 1)
-	       && ((pgTable *)obj)->GetTriggerCount() > 0;
+		&& (obj->GetOwner() == obj->GetConnection()->GetUser() || obj->GetServer()->GetSuperUser())
+		&& ((pgTable*)obj)->GetConnection()->BackendMinimumVersion(8, 1)
+		&& ((pgTable*)obj)->GetTriggerCount() > 0;
 }
 
-enableAllTriggersFactory::enableAllTriggersFactory(menuFactoryList *list, wxMenu *mnu, ctlMenuToolbar *toolbar) : contextActionFactory(list)
+enableAllTriggersFactory::enableAllTriggersFactory(menuFactoryList* list, wxMenu* mnu, ctlMenuToolbar* toolbar) : contextActionFactory(list)
 {
 	mnu->Append(id, _("Enable triggers"), _("Enable all triggers on the selected table."));
 }
 
 
-wxWindow *enableAllTriggersFactory::StartDialog(frmMain *form, pgObject *obj)
+wxWindow* enableAllTriggersFactory::StartDialog(frmMain* form, pgObject* obj)
 {
 	if (wxMessageBox(_("Are you sure you wish to enable all triggers on this table?"), _("Enable triggers"), wxYES_NO) != wxYES)
 		return 0;
 
-	if (!((pgTable *)obj)->EnableTriggers(true))
+	if (!((pgTable*)obj)->EnableTriggers(true))
 		return 0;
 
-	((pgTable *)obj)->iSetTriggersEnabled(form->GetBrowser(), true);
+	((pgTable*)obj)->iSetTriggersEnabled(form->GetBrowser(), true);
 
 	return 0;
 }
 
 
-bool enableAllTriggersFactory::CheckEnable(pgObject *obj)
+bool enableAllTriggersFactory::CheckEnable(pgObject* obj)
 {
 	return obj && obj->IsCreatedBy(tableFactory) && obj->CanEdit()
-	       && (obj->GetOwner() == obj->GetConnection()->GetUser() || obj->GetServer()->GetSuperUser())
-	       && ((pgTable *)obj)->GetConnection()->BackendMinimumVersion(8, 1)
-	       && ((pgTable *)obj)->GetTriggerCount() > 0;
+		&& (obj->GetOwner() == obj->GetConnection()->GetUser() || obj->GetServer()->GetSuperUser())
+		&& ((pgTable*)obj)->GetConnection()->BackendMinimumVersion(8, 1)
+		&& ((pgTable*)obj)->GetTriggerCount() > 0;
 }
 
-truncateFactory::truncateFactory(menuFactoryList *list, wxMenu *mnu, ctlMenuToolbar *toolbar) : contextActionFactory(list)
+truncateFactory::truncateFactory(menuFactoryList* list, wxMenu* mnu, ctlMenuToolbar* toolbar) : contextActionFactory(list)
 {
-	mnu->Append(id, _("&Truncate"),  _("Truncate the selected table."));
+	mnu->Append(id, _("&Truncate"), _("Truncate the selected table."));
 }
 
 
-wxWindow *truncateFactory::StartDialog(frmMain *form, pgObject *obj)
+wxWindow* truncateFactory::StartDialog(frmMain* form, pgObject* obj)
 {
 	if (wxMessageBox(_("Are you sure you wish to truncate this table?\n\nWARNING: This action will delete ALL data in the table!"), _("Truncate table"), wxYES_NO | wxICON_QUESTION | wxNO_DEFAULT) != wxYES)
 		return 0;
 
-	((pgTable *)obj)->Truncate(false);
-	((pgTable *)obj)->UpdateRows();
+	((pgTable*)obj)->Truncate(false);
+	((pgTable*)obj)->UpdateRows();
 	wxTreeItemId item = form->GetBrowser()->GetSelection();
 	if (obj == form->GetBrowser()->GetObject(item))
 		obj->ShowTreeDetail(form->GetBrowser(), 0, form->GetProperties());
@@ -1862,25 +1928,25 @@ wxWindow *truncateFactory::StartDialog(frmMain *form, pgObject *obj)
 }
 
 
-bool truncateFactory::CheckEnable(pgObject *obj)
+bool truncateFactory::CheckEnable(pgObject* obj)
 {
 	return obj && obj->IsCreatedBy(tableFactory);
 }
 
 
-truncateCascadedFactory::truncateCascadedFactory(menuFactoryList *list, wxMenu *mnu, ctlMenuToolbar *toolbar) : contextActionFactory(list)
+truncateCascadedFactory::truncateCascadedFactory(menuFactoryList* list, wxMenu* mnu, ctlMenuToolbar* toolbar) : contextActionFactory(list)
 {
 	mnu->Append(id, _("Truncate Cascaded"), _("Truncate the selected table and all referencing tables."));
 }
 
 
-wxWindow *truncateCascadedFactory::StartDialog(frmMain *form, pgObject *obj)
+wxWindow* truncateCascadedFactory::StartDialog(frmMain* form, pgObject* obj)
 {
 	if (wxMessageBox(_("Are you sure you wish to truncate this table and all tables that have foreign key references to this table?\n\nWARNING: This action will delete ALL data in the tables!"), _("Truncate table cascaded"), wxYES_NO | wxICON_QUESTION | wxNO_DEFAULT) != wxYES)
 		return 0;
 
-	((pgTable *)obj)->Truncate(true);
-	((pgTable *)obj)->UpdateRows();
+	((pgTable*)obj)->Truncate(true);
+	((pgTable*)obj)->UpdateRows();
 	wxTreeItemId item = form->GetBrowser()->GetSelection();
 	if (obj == form->GetBrowser()->GetObject(item))
 		obj->ShowTreeDetail(form->GetBrowser(), 0, form->GetProperties());
@@ -1889,31 +1955,31 @@ wxWindow *truncateCascadedFactory::StartDialog(frmMain *form, pgObject *obj)
 }
 
 
-bool truncateCascadedFactory::CheckEnable(pgObject *obj)
+bool truncateCascadedFactory::CheckEnable(pgObject* obj)
 {
-	return obj && obj->IsCreatedBy(tableFactory) && ((pgTable *)obj)->GetConnection()->BackendMinimumVersion(8, 2);
+	return obj && obj->IsCreatedBy(tableFactory) && ((pgTable*)obj)->GetConnection()->BackendMinimumVersion(8, 2);
 }
 
 
-resetTableStatsFactory::resetTableStatsFactory(menuFactoryList *list, wxMenu *mnu, ctlMenuToolbar *toolbar) : contextActionFactory(list)
+resetTableStatsFactory::resetTableStatsFactory(menuFactoryList* list, wxMenu* mnu, ctlMenuToolbar* toolbar) : contextActionFactory(list)
 {
-	mnu->Append(id, _("&Reset table statistics"),  _("Reset statistics of the selected table."));
+	mnu->Append(id, _("&Reset table statistics"), _("Reset statistics of the selected table."));
 }
 
 
-wxWindow *resetTableStatsFactory::StartDialog(frmMain *form, pgObject *obj)
+wxWindow* resetTableStatsFactory::StartDialog(frmMain* form, pgObject* obj)
 {
 	if (wxMessageBox(_("Are you sure you wish to reset statistics of this table?"), _("Reset statistics"), wxYES_NO) != wxYES)
 		return 0;
 
-	((pgTable *)obj)->ResetStats();
-	((pgTable *)obj)->ShowStatistics(form, form->GetStatistics());
+	((pgTable*)obj)->ResetStats();
+	((pgTable*)obj)->ShowStatistics(form, form->GetStatistics());
 
 	return 0;
 }
 
 
-bool resetTableStatsFactory::CheckEnable(pgObject *obj)
+bool resetTableStatsFactory::CheckEnable(pgObject* obj)
 {
-	return obj && obj->IsCreatedBy(tableFactory) && ((pgTable *)obj)->GetConnection()->BackendMinimumVersion(9, 0);
+	return obj && obj->IsCreatedBy(tableFactory) && ((pgTable*)obj)->GetConnection()->BackendMinimumVersion(9, 0);
 }

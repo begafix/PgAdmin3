@@ -98,6 +98,7 @@ public:
 	bool HasFeature(int feature = 0, bool forceCheck = false);
 	bool BackendMinimumVersion(int major, int minor);
 	bool BackendMinimumVersion(int major, int minor, int patch);
+	bool BackendMaximumVersion(int major, int minor);
 	bool EdbMinimumVersion(int major, int minor);
 	wxString SystemNamespaceRestriction(const wxString &nsp);
 	int GetMajorVersion() const

@@ -20,6 +20,7 @@
 #define CTL_EDITGRID 357
 #include "dlg/dlgClasses.h"
 #include "ctl/ctlSQLGrid.h"
+#include <db/pgConn.h>
 
 //
 // This number MUST be incremented if changing any of the default perspectives
