@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<!--<Product Id="80753BFC-D514-4211-9618-3758F723AD10" Name="Installer2" Language="1033" Version="1.0.0.0" 
+			 Manufacturer="The pgAdmin Development Team" 
+			 UpgradeCode="A75A3D21-4A0A-4E7C-9A3D-5E7917A1CBBC">
+			 pgAdmin III
+	-->
+	<?define ProductName="SetupProject1" ?>
+	<?define ProductId='A35D4C3E-1AED-43BC-8E82-B80DDC9D197C'?>
+	<?define UpgradeId='472D05AD-DCED-4210-B4F8-0FAA71D72782'?>
+	<?define ProgramName='pgAdmin3.exe'?>
+	<?define SourceDir='../../../pgadmin/x64/v143/Release'?>
+	<?define APPVERSION='1.23.0'?>
+	<?define APPNAME="$(var.ProductName)"?>
+	
+	
+	<Product Id="$(var.ProductId)" Name="Installer2" Language="1033" Version="1.0.0.0"
+			 Manufacturer="The pgAdmin Development Team. Latest upgrade custom"
+			 UpgradeCode="$(var.UpgradeId)">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+		<Media Id='1' Cabinet='data.cab' EmbedCab='no'  />
+
+		
+		<!--DiskPrompt='CD-ROM #1' <Property Id='DiskPrompt' Value="Acme's Foobar 1.0 Installation [1]" />-->		
+		<!--<MediaTemplate  EmbedCab="yes" CabinetTemplate="Sample.cab" DiskPrompt="CD-ROM #1"/>-->
+
+		<Feature Id="ProductFeature" Title="Installer2" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+	</Product>
+
+	<Fragment>		
+		<Directory Id='TARGETDIR' Name='SourceDir'>
+			<Directory Id='ProgramFilesFolder' Name='PFiles'>
+				<Directory Id='INSTALLDIR' Name='$(var.ProductName)'>
+				</Directory>
+			</Directory>			
+
+			<Directory Id="DesktopFolder" Name="Desktop" />
+			<Directory Id="ProgramMenuFolder" Name="Menu">
+				<Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)"/>
+			</Directory>
+		</Directory>
+		
+	</Fragment>
+
+	
+	<!--<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="Installer2" />
+			</Directory>
+		</Directory>
+	</Fragment>-->
+
+	
+
+	
+	<Fragment>
+		
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLDIR">
+			<!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+			<!-- <Component Id="ProductComponent"> -->
+				<!-- TODO: Insert files, registry keys, and other resources here. -->
+			<!-- </Component> -->
+			<Component Id="ProductComponent">
+				<File Id='Calc' DiskId='1' Source='C:\WINDOWS\system32\calc.exe'/>
+			 </Component>
+			
+			<Component Id='MainExecutable' Guid='$(var.ProductId)'>
+				<File Id='pgAdminEXE' Name='$(var.ProgramName)' DiskId='1' Source='$(var.SourceDir)/$(var.ProgramName)' KeyPath='yes'>					
+					<!--<Shortcut Id="startMenuPgAdmin" Directory="Desktop" Name="$(var.ProductName)" 
+						WorkingDirectory='INSTALLDIR' Icon="$(var.ProgramName)" IconIndex="0" Advertise="yes" />-->
+					<!--<Shortcut Id="desktopPgAdmin" Directory="DesktopFolder" Name="$(var.ProductName)"
+						WorkingDirectory='INSTALLDIR' Icon="$(var.ProgramName)" IconIndex="0" Advertise="yes" />-->
+				</File>
+			</Component>
+		</ComponentGroup>
+	</Fragment>
+</Wix>

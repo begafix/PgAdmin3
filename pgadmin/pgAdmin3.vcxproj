@@ -166,11 +166,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pgadmin3.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Release/pgAdmin3.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(pgOutObj)\pgAdmin3.pch</PrecompiledHeaderOutputFile>
       <AssemblerOutput>All</AssemblerOutput>
-      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <AssemblerListingLocation>$(pgOutObj)\</AssemblerListingLocation>
+      <ObjectFileName>$(pgOutObj)\</ObjectFileName>
+      <ProgramDataBaseFileName>$(pgOutObj)\</ProgramDataBaseFileName>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>

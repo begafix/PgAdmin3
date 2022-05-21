@@ -280,10 +280,16 @@ int dlgIndexConstraint::Go(bool modal)
 		cbTablespace->SetSelection(0);
 
 		cbType->Append(wxT(""));
-		set = connection->ExecuteSet(
+		//bega 20220522
+		//amgettuple replaced since 9.5. I change it to amhandler
+		/*set = connection->ExecuteSet(
 		          wxT("SELECT oid, amname FROM pg_am ")
 		          wxT("WHERE EXISTS (SELECT 1 FROM pg_proc WHERE oid=amgettuple) ")
-		          wxT("ORDER BY amname"));
+		          wxT("ORDER BY amname"));*/
+		set = connection->ExecuteSet(
+			wxT("SELECT oid, amname FROM pg_am ")
+			wxT("WHERE EXISTS (SELECT 1 FROM pg_proc WHERE oid=amhandler) ")
+			wxT("ORDER BY amname"));
 		if (set)
 		{
 			while (!set->Eof())
