@@ -5,33 +5,125 @@
 			 UpgradeCode="A75A3D21-4A0A-4E7C-9A3D-5E7917A1CBBC">
 			 pgAdmin III
 	-->
-	<?define ProductName="SetupProject1" ?>
+	<?define ProductName="pgAdmin III" ?>
 	<?define ProductId='A35D4C3E-1AED-43BC-8E82-B80DDC9D197C'?>
 	<?define UpgradeId='472D05AD-DCED-4210-B4F8-0FAA71D72782'?>
-	<?define ProgramName='pgAdmin3.exe'?>
-	<?define SourceDir='../../../pgadmin/x64/v143/Release'?>
-	<?define APPVERSION='1.23.0'?>
-	<?define APPNAME="$(var.ProductName)"?>
+	<?define AppId='A98E8BFD-CA98-4E72-B64E-3DE14985256B'?>
+	<?define DocId='EC572F39-9085-4B9A-817D-99008B9D3F13'?>
+	<?define ShortcutId='2F0FE7C1-069A-4351-9BCE-2BF10C9F9FB7'?>
+	<?define CoreLibId='F1BDD62A-3E2D-446E-AAD5-258BD2FA6968'?>
+	<?define AppName='pgAdmin3.exe'?>
+	<?define SourceDir='$(var.pgAdmin3.TargetDir)'?>
+	<?define AppVersion='1.23.0'?>	
+	<?define AppVendor=Original vendor:The pgAdmin Development Team. Fix for latest version of Postgresql by Begafix?>	
+	<?define AppKeyWords=PostgreSQL, pgAdmin?> 
+	<?define AppComments=PostgreSQL Tools?>
+	<?define AppDescription=Management and administration tools for the PostgreSQL DBMS?>
+	<!-- Core libx-->
+	<?define LibNetVC='wxbase30u_net_vc_x64_custom.dll'?>
+	<?define LibVC='wxbase30u_vc_x64_custom.dll'?>
+	<?define LibXml='wxbase30u_xml_vc_x64_custom.dll'?>
+	<?define LibAdv='wxmsw30u_adv_vc_x64_custom.dll'?>
+	<?define LibAui='wxmsw30u_aui_vc_x64_custom.dll'?>
+	<?define LibCore='wxmsw30u_core_vc_x64_custom.dll'?>
+	<?define LibHtml='wxmsw30u_html_vc_x64_custom.dll'?>
+	<?define LibStc='wxmsw30u_stc_vc_x64_custom.dll'?>
+	<?define LibXrc='wxmsw30u_xrc_vc_x64_custom.dll'?>
+	<!-- Postgresql libx-->
+	<?define LibCrypto='libcrypto-1_1-x64.dll'?>
+	<?define LibConv='libiconv-2.dll'?>
+	<?define LibIntl='libintl-9.dll'?>
+	<?define LibPQ='libpq.dll'?>	
+	<?define LibSll='libssl-1_1-x64.dll'?>
+	<?define LibXml2='libxml2.dll'?>
+	<?define LibXslt='libxslt.dll'?>
 	
-	
-	<Product Id="$(var.ProductId)" Name="Installer2" Language="1033" Version="1.0.0.0"
-			 Manufacturer="The pgAdmin Development Team. Latest upgrade custom"
+
+	<Product Id="$(var.ProductId)" Name="$(var.ProductName)" Language="1033" Version="$(var.AppVersion)"
+			 Manufacturer="$(var.AppVendor)"
 			 UpgradeCode="$(var.UpgradeId)">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
-		<Media Id='1' Cabinet='data.cab' EmbedCab='no'  />
+		<Media Id='1' Cabinet='data.cab' EmbedCab='no'  />		
 
+		<UI>
+			<UIRef Id='WixUI_Advanced'/>
+		</UI>
 		
-		<!--DiskPrompt='CD-ROM #1' <Property Id='DiskPrompt' Value="Acme's Foobar 1.0 Installation [1]" />-->		
-		<!--<MediaTemplate  EmbedCab="yes" CabinetTemplate="Sample.cab" DiskPrompt="CD-ROM #1"/>-->
+		<Property Id="ApplicationFolderName" Value="$(var.ProductName)" />
+		<Property Id="WixAppFolder" Value="WixPerMachineFolder" />
 
-		<Feature Id="ProductFeature" Title="Installer2" Level="1">
-			<ComponentGroupRef Id="ProductComponents" />
+
+		<Feature Id="MainApplication" Title="$(var.ProductName)" Level="1">
+			<ComponentRef Id="myapp.exe" />
+			<ComponentRef Id="doc" />
+			<ComponentRef Id="core_libs"/>
+			<!-- Step 3: Tell WiX to install the shortcut -->
+			<ComponentRef Id="ApplicationShortcut" />
 		</Feature>
+
 	</Product>
 
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFiles64Folder">				
+				<Directory Id="AppRootDir" Name="$(var.ProductName)" />
+				
+			</Directory>
+			<!-- Step 1: Define the directory structure -->
+			<Directory Id="ProgramMenuFolder">
+				<Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)"/>
+			</Directory>
+		</Directory>
+		<!--<Property Id="WIXUI_INSTALLDIR" Value="AppRootDir" />-->
+		<!--<UIRef Id="WixUI_InstallDir" />-->
+
+	</Fragment>
+
+	<Fragment>
+		<DirectoryRef Id="AppRootDir">
+			<Component Id="myapp.exe" Guid="$(var.AppId)">
+				<File Id="myapp.exe" Source="$(var.SourceDir)\PgAdmin3.exe" KeyPath="yes" Checksum="yes"/>
+			</Component>
+			<Component Id="core_libs" Guid="$(var.CoreLibId)">
+				<File Id="core_libs.wxbase30u_net_vc_x64_custom.dll"  Name="wxbase30u_net_vc_x64_custom.dll" Source="$(var.SourceDir)\wxbase30u_net_vc_x64_custom.dll"  Checksum="yes"/>
+				<File Id="core_libs.wxbase30u_vc_x64_custom.dll"  Name="wxbase30u_vc_x64_custom.dll" Source="$(var.SourceDir)\wxbase30u_vc_x64_custom.dll"  Checksum="yes"/>
+				<File Id="core_libs.$(var.LibXml)"  Name="$(var.LibXml)" Source="$(var.SourceDir)\$(var.LibXml)"  Checksum="yes"/>
+				<File Id="core_libs.$(var.LibAdv)"  Name="$(var.LibAdv)" Source="$(var.SourceDir)\$(var.LibAdv)"  Checksum="yes"/>
+				<File Id="core_libs.$(var.LibAui)"  Name="$(var.LibAui)" Source="$(var.SourceDir)\$(var.LibAui)"  Checksum="yes"/>
+				<File Id="core_libs.$(var.LibCore)"  Name="$(var.LibCore)" Source="$(var.SourceDir)\$(var.LibCore)"  Checksum="yes"/>
+				<File Id="core_libs.$(var.LibHtml)"  Name="$(var.LibHtml)" Source="$(var.SourceDir)\$(var.LibHtml)"  Checksum="yes"/>
+				<File Id="core_libs.$(var.LibStc)"  Name="$(var.LibStc)" Source="$(var.SourceDir)\$(var.LibStc)"  Checksum="yes"/>
+				<File Id="core_libs.$(var.LibXrc)"  Name="$(var.LibXrc)" Source="$(var.SourceDir)\$(var.LibXrc)"  Checksum="yes"/>
+				<!-- Postgresql libs -->
+				<File Id="crypto"  Name="$(var.LibCrypto)" Source="$(var.SourceDir)\$(var.LibCrypto)"  Checksum="yes"/>
+				<File Id="conv"  Name="$(var.LibConv)" Source="$(var.SourceDir)\$(var.LibConv)"  Checksum="yes"/>
+				<File Id="intl"  Name="$(var.LibIntl)" Source="$(var.SourceDir)\$(var.LibIntl)"  Checksum="yes"/>
+				<File Id="pq"  Name="$(var.LibPQ)" Source="$(var.SourceDir)\$(var.LibPQ)"  Checksum="yes"/>
+				<File Id="sll"  Name="$(var.LibSll)" Source="$(var.SourceDir)\$(var.LibSll)"  Checksum="yes"/>
+				<File Id="xml2"  Name="$(var.LibXml2)" Source="$(var.SourceDir)\$(var.LibXml2)"  Checksum="yes"/>
+				<File Id="xslt"  Name="$(var.LibXslt)" Source="$(var.SourceDir)\$(var.LibXslt)"  Checksum="yes"/>
+			</Component>
+			<Component Id="doc" Guid="$(var.DocId)">
+				<File Id="doc" Source="c:\temp\calc.html" KeyPath="yes"/>
+			</Component>
+		</DirectoryRef>
+
+		<!-- Step 2: Add the shortcut to your installer package -->
+		<DirectoryRef Id="ApplicationProgramsFolder">
+			<Component Id="ApplicationShortcut" Guid="$(var.ShortcutId)">
+				<Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"  Description="$(var.AppDescription)" Target="[#myapp.exe]"
+                          WorkingDirectory="AppRootDir"/>
+				<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>				
+				<RegistryValue Id="HAppKey" Root="HKCU" Key="Software\$(var.ProductName).3" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+				<RemoveRegistryKey Id="HAppKeyRemove" Root="HKCU" Key="Software\$(var.ProductName).3" Action="removeOnUninstall"/>
+			</Component>
+		</DirectoryRef>
+	</Fragment>
+	
+	<!--
 	<Fragment>		
 		<Directory Id='TARGETDIR' Name='SourceDir'>
 			<Directory Id='ProgramFilesFolder' Name='PFiles'>
@@ -41,43 +133,27 @@
 
 			<Directory Id="DesktopFolder" Name="Desktop" />
 			<Directory Id="ProgramMenuFolder" Name="Menu">
-				<Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)"/>
+				<Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)" />
 			</Directory>
 		</Directory>
 		
-	</Fragment>
-
-	
-	<!--<Fragment>
-		<Directory Id="TARGETDIR" Name="SourceDir">
-			<Directory Id="ProgramFilesFolder">
-				<Directory Id="INSTALLFOLDER" Name="Installer2" />
-			</Directory>
-		</Directory>
-	</Fragment>-->
-
-	
+	</Fragment>		
 
 	
 	<Fragment>
 		
-		<ComponentGroup Id="ProductComponents" Directory="INSTALLDIR">
-			<!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
-			<!-- <Component Id="ProductComponent"> -->
-				<!-- TODO: Insert files, registry keys, and other resources here. -->
-			<!-- </Component> -->
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLDIR">			
 			<Component Id="ProductComponent">
 				<File Id='Calc' DiskId='1' Source='C:\WINDOWS\system32\calc.exe'/>
 			 </Component>
 			
 			<Component Id='MainExecutable' Guid='$(var.ProductId)'>
 				<File Id='pgAdminEXE' Name='$(var.ProgramName)' DiskId='1' Source='$(var.SourceDir)/$(var.ProgramName)' KeyPath='yes'>					
-					<!--<Shortcut Id="startMenuPgAdmin" Directory="Desktop" Name="$(var.ProductName)" 
-						WorkingDirectory='INSTALLDIR' Icon="$(var.ProgramName)" IconIndex="0" Advertise="yes" />-->
-					<!--<Shortcut Id="desktopPgAdmin" Directory="DesktopFolder" Name="$(var.ProductName)"
-						WorkingDirectory='INSTALLDIR' Icon="$(var.ProgramName)" IconIndex="0" Advertise="yes" />-->
+					<Shortcut Id="startMenuPgAdmin" Directory="DesktopFolder" Name="$(var.ProductName)" 
+						WorkingDirectory='INSTALLDIR'  IconIndex="0" Advertise="yes"  />					
 				</File>
+				<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
 			</Component>
 		</ComponentGroup>
-	</Fragment>
+	</Fragment>-->
 </Wix>
