@@ -6,6 +6,7 @@
 			 pgAdmin III
 	-->
 	<?define ProductName="pgAdmin III" ?>
+	<?define ProductVersion='1.23'?>
 	<?define ProductId='A35D4C3E-1AED-43BC-8E82-B80DDC9D197C'?>
 	<?define UpgradeId='472D05AD-DCED-4210-B4F8-0FAA71D72782'?>
 	<?define AppId='A98E8BFD-CA98-4E72-B64E-3DE14985256B'?>
@@ -14,7 +15,10 @@
 	<?define CoreLibId='F1BDD62A-3E2D-446E-AAD5-258BD2FA6968'?>
 	<?define AppName='pgAdmin3.exe'?>
 	<?define SourceDir='$(var.pgAdmin3.TargetDir)'?>
-	<?define AppVersion='1.23.0'?>	
+	<?define ProjectDir='$(var.pgAdmin3.ProjectDir)'?>	
+	<?define BUILDTREE='$(var.SolutionDir)'?>
+	
+	<?define AppVersion='$(var.ProductVersion).0'?>	
 	<?define AppVendor=Original vendor:The pgAdmin Development Team. Fix for latest version of Postgresql by Begafix?>	
 	<?define AppKeyWords=PostgreSQL, pgAdmin?> 
 	<?define AppComments=PostgreSQL Tools?>
@@ -37,6 +41,7 @@
 	<?define LibSll='libssl-1_1-x64.dll'?>
 	<?define LibXml2='libxml2.dll'?>
 	<?define LibXslt='libxslt.dll'?>
+	<?define PgDir='$(env.PGDIR)'?>
 	
 
 	<Product Id="$(var.ProductId)" Name="$(var.ProductName)" Language="1033" Version="$(var.AppVersion)"
@@ -60,6 +65,9 @@
 			<ComponentRef Id="myapp.exe" />
 			<ComponentRef Id="doc" />
 			<ComponentRef Id="core_libs"/>
+			<ComponentRef Id="plugins.d"/>
+			<ComponentRef Id="pg_exec"/>
+			<ComponentRef Id="i18n"/>
 			<!-- Step 3: Tell WiX to install the shortcut -->
 			<ComponentRef Id="ApplicationShortcut" />
 		</Feature>
@@ -68,24 +76,28 @@
 
 	<Fragment>
 		<Directory Id="TARGETDIR" Name="SourceDir">
-			<Directory Id="ProgramFiles64Folder">				
-				<Directory Id="AppRootDir" Name="$(var.ProductName)" />
-				
+			<Directory Id="ProgramFiles64Folder">
+				<Directory Id="AppRootDir" Name="$(var.ProductName)" >
+					<Directory Id="VersionDir" Name="$(var.ProductVersion)"/>						 				
+				</Directory>				
 			</Directory>
 			<!-- Step 1: Define the directory structure -->
 			<Directory Id="ProgramMenuFolder">
-				<Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)"/>
+				<Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName) $(var.ProductVersion)" >											
+					
+				</Directory>
 			</Directory>
+			<Directory Id="DesktopFolder"/>
+							
 		</Directory>
 		<!--<Property Id="WIXUI_INSTALLDIR" Value="AppRootDir" />-->
-		<!--<UIRef Id="WixUI_InstallDir" />-->
-
+		<!--<UIRef Id="WixUI_InstallDir" />-->		
 	</Fragment>
 
-	<Fragment>
-		<DirectoryRef Id="AppRootDir">
+	<Fragment Id="InstalledFiles">
+		<DirectoryRef Id="VersionDir">
 			<Component Id="myapp.exe" Guid="$(var.AppId)">
-				<File Id="myapp.exe" Source="$(var.SourceDir)\PgAdmin3.exe" KeyPath="yes" Checksum="yes"/>
+				<File Id="myapp.exe" Source="$(var.SourceDir)\PgAdmin3.exe" KeyPath="yes" Checksum="yes"/>				
 			</Component>
 			<Component Id="core_libs" Guid="$(var.CoreLibId)">
 				<File Id="core_libs.wxbase30u_net_vc_x64_custom.dll"  Name="wxbase30u_net_vc_x64_custom.dll" Source="$(var.SourceDir)\wxbase30u_net_vc_x64_custom.dll"  Checksum="yes"/>
@@ -105,14 +117,45 @@
 				<File Id="sll"  Name="$(var.LibSll)" Source="$(var.SourceDir)\$(var.LibSll)"  Checksum="yes"/>
 				<File Id="xml2"  Name="$(var.LibXml2)" Source="$(var.SourceDir)\$(var.LibXml2)"  Checksum="yes"/>
 				<File Id="xslt"  Name="$(var.LibXslt)" Source="$(var.SourceDir)\$(var.LibXslt)"  Checksum="yes"/>
+				<!-- Settings -->
+				<File Id="settings" Name="settings.ini" Source="$(var.SolutionDir)pgAdmin\settings.ini"  />
 			</Component>
-			<Component Id="doc" Guid="$(var.DocId)">
-				<File Id="doc" Source="c:\temp\calc.html" KeyPath="yes"/>
+			
+			<!--PgExec-->
+			<Component Id="pg_exec" Guid="A2427C94-AF2C-4BDD-A0DA-73C47F2B4613">
+				<File Id="pg_dump" Name="pg_dump.exe" Source="$(var.PgDir)\bin\pg_dump.exe" Checksum="yes"/>
+				<File Id="pg_dumpall" Name="pg_dumpall.exe" Source="$(var.PgDir)\bin\pg_dumpall.exe" Checksum="yes"/>
+				<File Id="pg_restore" Name="pg_restore.exe" Source="$(var.PgDir)\bin\pg_restore.exe" Checksum="yes"/>
+				<File Id="psql" Name="psql.exe" Source="$(var.PgDir)\bin\psql.exe" Checksum="yes"/>
 			</Component>
+			
+			<!-- i18n -->
+			<Directory Id="i18nDir" Name="i18n">
+				<Component Id="i18n" Guid="{BC3CA712-3710-46F7-A042-86B5926ADBC8}" >
+					<File Id="lng.settings" Name="pg_settings.csv" Source="$(var.SolutionDir)i18n\pg_settings.csv"/>
+					<File Id="lng.pgadmin" Name="pgadmin3.lng" Source="$(var.SolutionDir)i18n\pgadmin3.lng"/>
+				</Component>
+				<?include i18ndata.wxi?>
+			</Directory>
+			
+			<!--Doc-->
+			<Directory Id="DocDir" Name="Docs">
+				<Component Id="doc" Guid="$(var.DocId)">
+					<File Id="doc" Source="c:\temp\calc.html" KeyPath="yes"/>
+				</Component>
+			</Directory>
+			
+			<!-- Plugins -->
+			<Directory Id="PluginDir" Name="plugins.d">
+				<Component Id="plugins.d" Guid="{A38E536A-9643-4DE0-80D2-BFFF0E2D82DD}">
+					 <File Id="plugins.d.plugins.ini" Name="plugins.ini" Source="$(var.SolutionDir)plugins.d\plugins.ini" />
+				</Component>
+			</Directory>
+		
+			
 		</DirectoryRef>
-
 		<!-- Step 2: Add the shortcut to your installer package -->
-		<DirectoryRef Id="ApplicationProgramsFolder">
+		<!--<DirectoryRef Id="ApplicationProgramsFolder">
 			<Component Id="ApplicationShortcut" Guid="$(var.ShortcutId)">
 				<Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"  Description="$(var.AppDescription)" Target="[#myapp.exe]"
                           WorkingDirectory="AppRootDir"/>
@@ -120,40 +163,26 @@
 				<RegistryValue Id="HAppKey" Root="HKCU" Key="Software\$(var.ProductName).3" Name="installed" Type="integer" Value="1" KeyPath="yes" />
 				<RemoveRegistryKey Id="HAppKeyRemove" Root="HKCU" Key="Software\$(var.ProductName).3" Action="removeOnUninstall"/>
 			</Component>
+		</DirectoryRef>-->		
+		
+	</Fragment>
+
+	<Fragment Id="Shortcuts">
+		<DirectoryRef Id="ApplicationProgramsFolder">
+			<Directory Id="AppMenuDir" Name="$(var.ProductName)">
+				<Component Id="ApplicationShortcut" Guid="$(var.ShortcutId)">
+					<Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"  Description="$(var.AppDescription)" Target="[#myapp.exe]"
+							  WorkingDirectory="AppRootDir"/>
+					<RegistryValue Id="HAppKey" Root="HKCU" Key="Software\$(var.ProductName).3" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+					<RemoveRegistryKey Id="HAppKeyRemove" Root="HKCU" Key="Software\$(var.ProductName).3" Action="removeOnUninstall"/>
+					<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" Directory="ApplicationProgramsFolder"/>
+					<RemoveFolder Id="AppMenuDir" On="uninstall"/>
+				</Component>
+					
+			</Directory>
+			
 		</DirectoryRef>
+		
 	</Fragment>
 	
-	<!--
-	<Fragment>		
-		<Directory Id='TARGETDIR' Name='SourceDir'>
-			<Directory Id='ProgramFilesFolder' Name='PFiles'>
-				<Directory Id='INSTALLDIR' Name='$(var.ProductName)'>
-				</Directory>
-			</Directory>			
-
-			<Directory Id="DesktopFolder" Name="Desktop" />
-			<Directory Id="ProgramMenuFolder" Name="Menu">
-				<Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)" />
-			</Directory>
-		</Directory>
-		
-	</Fragment>		
-
-	
-	<Fragment>
-		
-		<ComponentGroup Id="ProductComponents" Directory="INSTALLDIR">			
-			<Component Id="ProductComponent">
-				<File Id='Calc' DiskId='1' Source='C:\WINDOWS\system32\calc.exe'/>
-			 </Component>
-			
-			<Component Id='MainExecutable' Guid='$(var.ProductId)'>
-				<File Id='pgAdminEXE' Name='$(var.ProgramName)' DiskId='1' Source='$(var.SourceDir)/$(var.ProgramName)' KeyPath='yes'>					
-					<Shortcut Id="startMenuPgAdmin" Directory="DesktopFolder" Name="$(var.ProductName)" 
-						WorkingDirectory='INSTALLDIR'  IconIndex="0" Advertise="yes"  />					
-				</File>
-				<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
-			</Component>
-		</ComponentGroup>
-	</Fragment>-->
 </Wix>

@@ -110,7 +110,7 @@ bool ctlSQLResult::IsColText(int col)
 int ctlSQLResult::Execute(const wxString &query, int resultToRetrieve, wxWindow *caller, long eventId, void *data)
 {
 	wxGridTableMessage *msg;
-	sqlResultTable *table = (sqlResultTable *)GetTable();
+	sqlResultTable *table = (sqlResultTable *)GetTable();	
 	msg = new wxGridTableMessage(table, wxGRIDTABLE_NOTIFY_ROWS_DELETED, 0, GetNumberRows());
 	ProcessTableMessage(*msg);
 	delete msg;
