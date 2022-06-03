@@ -62,14 +62,14 @@
 
 
 		<Feature Id="MainApplication" Title="$(var.ProductName)" Level="1">
-			<ComponentRef Id="myapp.exe" />
+			<ComponentRef Id="myapp_exe" />
 			<ComponentRef Id="doc" />
 			<ComponentRef Id="core_libs"/>
 			<ComponentRef Id="plugins.d"/>
 			<ComponentRef Id="pg_exec"/>
 			<ComponentRef Id="i18n"/>
 			<!-- Step 3: Tell WiX to install the shortcut -->
-			<ComponentRef Id="ApplicationShortcut" />
+			<ComponentRef Id="ApplicationShortcut" />			
 		</Feature>
 
 	</Product>
@@ -96,8 +96,13 @@
 
 	<Fragment Id="InstalledFiles">
 		<DirectoryRef Id="VersionDir">
-			<Component Id="myapp.exe" Guid="$(var.AppId)">
-				<File Id="myapp.exe" Source="$(var.SourceDir)\PgAdmin3.exe" KeyPath="yes" Checksum="yes"/>				
+			<Component Id="myapp_exe" Guid="$(var.AppId)">
+				<File Id="pgadmin_exe" Source="$(var.SourceDir)\PgAdmin3.exe" KeyPath="yes" Checksum="yes"/>				
+				<ProgId Id="pgAdmin.1" Icon="pgadmin_exe" IconIndex="1">
+						   <Extension ContentType="text/plain" Id="sql">
+							   <Verb Id="open" Command="Open" TargetFile="pgadmin_exe" Argument='-q -f "%1"' />
+							</Extension>
+				</ProgId>				
 			</Component>
 			<Component Id="core_libs" Guid="$(var.CoreLibId)">
 				<File Id="core_libs.wxbase30u_net_vc_x64_custom.dll"  Name="wxbase30u_net_vc_x64_custom.dll" Source="$(var.SourceDir)\wxbase30u_net_vc_x64_custom.dll"  Checksum="yes"/>
@@ -170,19 +175,40 @@
 	<Fragment Id="Shortcuts">
 		<DirectoryRef Id="ApplicationProgramsFolder">
 			<Directory Id="AppMenuDir" Name="$(var.ProductName)">
-				<Component Id="ApplicationShortcut" Guid="$(var.ShortcutId)">
-					<Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"  Description="$(var.AppDescription)" Target="[#myapp.exe]"
-							  WorkingDirectory="AppRootDir"/>
-					<RegistryValue Id="HAppKey" Root="HKCU" Key="Software\$(var.ProductName).3" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+				<Component Id="ApplicationShortcut" Guid="$(var.ShortcutId)">	
+					
+					<Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"  
+						Description="$(var.AppDescription)" Target="[#pgadmin_exe]"
+						WorkingDirectory="AppRootDir"/>
+					
+					
+					<Shortcut Id="DesktopShortcut" Name="$(var.ProductName)"  
+						Description="$(var.AppDescription)" Target="[#pgadmin_exe]"
+						Directory="DesktopFolder" 
+						WorkingDirectory="AppRootDir"/>				
+					
+					<RegistryKey Id="HAppKey" Root="HKCU" Key="Software\$(var.ProductName)"
+								 Action="createAndRemoveOnUninstall">
+						<RegistryValue Name="Font" Type="string" Value="0;-17;0;0;0;400;0;0;0;204;3;2;1;34;Segoe UI"/>
+						<RegistryValue Name="LogLevel" Type="integer" Value="3"/>
+						<RegistryValue Name="LanguageId" Type="integer" Value="60"/>
+						<RegistryValue Name="DDFont" Type="string" Value="0;-17;0;0;0;400;0;0;0;204;3;2;1;34;Segoe UI"/>
+ 						<RegistryValue Key="Display" Name="Types" Type="string" Value="true"/>
+						<RegistryValue Key="frmQuery" Name="Font" Type="string" Value="0;-17;0;0;0;400;0;0;0;204;3;2;1;49;Courier New"/>
+					</RegistryKey>
+					
+					<!--<RegistryValue Id="HAppKey" Root="HKCU" Key="Software\$(var.ProductName)" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+					
+					
 					<RemoveRegistryKey Id="HAppKeyRemove" Root="HKCU" Key="Software\$(var.ProductName).3" Action="removeOnUninstall"/>
+					-->
 					<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" Directory="ApplicationProgramsFolder"/>
 					<RemoveFolder Id="AppMenuDir" On="uninstall"/>
 				</Component>
-					
-			</Directory>
-			
-		</DirectoryRef>
+				
+			</Directory>			
+		</DirectoryRef>	
 		
-	</Fragment>
+	</Fragment>	
 	
 </Wix>
