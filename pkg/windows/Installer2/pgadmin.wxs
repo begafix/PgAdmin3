@@ -63,7 +63,7 @@
 
 		<Feature Id="MainApplication" Title="$(var.ProductName)" Level="1">
 			<ComponentRef Id="myapp_exe" />
-			<ComponentRef Id="doc" />
+			<!--<ComponentRef Id="doc" />-->
 			<ComponentRef Id="core_libs"/>
 			<ComponentRef Id="plugins.d"/>
 			<ComponentRef Id="pg_exec"/>
@@ -144,11 +144,13 @@
 			</Directory>
 			
 			<!--Doc-->
+			<!--
 			<Directory Id="DocDir" Name="Docs">
 				<Component Id="doc" Guid="$(var.DocId)">
 					<File Id="doc" Source="c:\temp\calc.html" KeyPath="yes"/>
 				</Component>
 			</Directory>
+			-->
 			
 			<!-- Plugins -->
 			<Directory Id="PluginDir" Name="plugins.d">
