@@ -264,9 +264,16 @@ bool pgConn::Initialize()
 		wxString sql = wxT("SET DateStyle=ISO;\nSET client_min_messages=notice;\n");
 		if (BackendMinimumVersion(9, 0))
 			sql += wxT("SET bytea_output=escape;\n");
-
-		sql += wxT("SELECT oid, pg_encoding_to_char(encoding) AS encoding, datlastsysoid\n")
-		       wxT("  FROM pg_database WHERE ");
+		
+		//20221208 15:37 for Postgresql 15
+		if (this->BackendMinimumVersion(15, 0)) {
+			sql += wxT("SELECT oid, pg_encoding_to_char(encoding) AS encoding\n")
+				wxT("  FROM pg_database WHERE ");
+		}
+		else {
+			sql += wxT("SELECT oid, pg_encoding_to_char(encoding) AS encoding, datlastsysoid\n")
+				wxT("  FROM pg_database WHERE ");
+		}
 
 		if (save_oid)
 			sql += wxT("oid = ") + NumToStr(save_oid);
@@ -282,10 +289,18 @@ bool pgConn::Initialize()
 		pgSet *set = ExecuteSet(sql);
 		if (set)
 		{
-			if (set->ColNumber(wxT("\"datlastsysoid\"")) >= 0)
-				needColQuoting = true;
+			//20221208 15:37 for Postgresql 15
+			if (this->BackendMaximumVersion(15, 0)) {
+				if (set->ColNumber(wxT("\"datlastsysoid\"")) >= 0)
+					needColQuoting = true;
 
-			lastSystemOID = set->GetOid(wxT("datlastsysoid"));
+				lastSystemOID = set->GetOid(wxT("datlastsysoid"));
+			}
+			else {
+				lastSystemOID = 0;
+				needColQuoting = true;
+			}
+			
 			dbOid = set->GetOid(wxT("oid"));
 			wxString encoding = set->GetVal(wxT("encoding"));
 

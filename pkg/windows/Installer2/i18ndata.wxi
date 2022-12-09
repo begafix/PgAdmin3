@@ -2,7 +2,7 @@
 <Include>
 	<!-- TODO: Put your code here. -->	
 	<Directory Id="i18n_ru_RU" Name="ru_RU">
-		<Component Id="i18n_ru_RU" Guid="{D695C2EF-600A-4A1E-900A-A21A8C60B4C9}" Feature="MainApplication">
+		<Component Id="i18n_ru_RU" Guid="{D695C2EF-600A-4A1E-900A-A21A8C60B4C9}" Feature="MainApplication" KeyPath="yes">
 			<File Id="i18n_ru_RU.pgadmin3.mo" Name="pgadmin3.mo" DiskId="1" Source="$(var.BUILDTREE)/i18n/ru_RU/pgadmin3.mo" />
 			<File Id="i18n_ru_RU.wxstd.mo" Name="wxstd.mo" DiskId="1" Source="$(var.BUILDTREE)/i18n/ru_RU/wxstd.mo" />
 		</Component>
