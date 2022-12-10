@@ -99,7 +99,7 @@ public:
 
 private:
 	wxLongLong lastValue, nextValue, minValue, maxValue, cacheValue, increment;
-	bool cycled, called, isReplicated;
+	bool cycled = false, called=true, isReplicated=false;
 };
 
 class pgSequenceCollection : public pgSchemaObjCollection

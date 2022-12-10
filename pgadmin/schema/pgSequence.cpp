@@ -117,33 +117,21 @@ bool pgSequence::DropObject(wxFrame *frame, ctlTree *browser, bool cascaded)
 void pgSequence::UpdateValues()
 {
 	//bega 20220514
-	pgSet* sequence = NULL;
-	if (this->GetConnection()->BackendMaximumVersion(9, 6))
-	{
-		sequence = ExecuteSet(
-			wxT("SELECT last_value, min_value, max_value, cache_value, is_cycled, increment_by, is_called\n")
-			wxT("  FROM ") + GetQuotedFullIdentifier());
-	}
-	else
-	{
-		wxString seq_name = GetName();
-		wxString schema_name = GetSchema()->GetName();
-		sequence = ExecuteSet(wxT("SELECT  ps.last_value, min_value, max_value, cache_size as cache_value, cycle as is_cycled, increment_by, ids.is_called\n")
-			wxT("FROM pg_sequences ps, adminko.users_id_seq ids\n")
-			wxT("WHERE   schemaname = '"+schema_name+"' AND sequencename = '"+seq_name+"'\n"));
-
-	}
-	
+	pgSet* sequence = ExecuteSet(
+		wxT("SELECT last_value, min_value, max_value, cache_size, cycle, increment_by\n")
+		wxT("  FROM pg_sequences where schemaname='") + 
+		this->GetSchema()->GetQuotedIdentifier() + 
+		wxT("' and sequencename='") + GetQuotedIdentifier() + wxT("'"));
 	
 	if (sequence)
 	{
 		lastValue = sequence->GetLongLong(wxT("last_value"));
 		minValue = sequence->GetLongLong(wxT("min_value"));
 		maxValue = sequence->GetLongLong(wxT("max_value"));
-		cacheValue = sequence->GetLongLong(wxT("cache_value"));
+		cacheValue = sequence->GetLongLong(wxT("cache_size"));
 		increment = sequence->GetLongLong(wxT("increment_by"));
-		cycled = sequence->GetBool(wxT("is_cycled"));
-		called = sequence->GetBool(wxT("is_called"));
+		cycled = sequence->GetBool(wxT("cycle"));
+		//		called = sequence->GetBool(wxT("is_called"));
 		if (called)
 			nextValue = lastValue + increment;
 		else
@@ -151,6 +139,8 @@ void pgSequence::UpdateValues()
 
 		delete sequence;
 	}
+
+	
 }
 
 
