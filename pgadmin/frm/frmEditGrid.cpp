@@ -115,7 +115,7 @@ frmEditGrid::frmEditGrid(frmMain *form, const wxString &_title, pgConn *_conn, p
 	sqlGrid = new ctlSQLEditGrid(this, CTL_EDITGRID, wxDefaultPosition, wxDefaultSize);
 	sqlGrid->SetTable(0);
 #ifdef __WXMSW__
-	sqlGrid->SetDefaultRowSize(sqlGrid->GetDefaultRowSize() + 2, true);
+	sqlGrid->SetDefaultRowSize(sqlGrid->GetDefaultRowSize() + 10, true);
 #endif
 
 	// Set up toolbar
@@ -1569,8 +1569,8 @@ void ctlSQLEditGrid::ResizeEditor(int row, int col)
 			wxSize size = renderer->GetBestSize(*this, *attr, dc, row, col);
 			renderer->DecRef();
 
-			int w = wxMax(size.GetWidth(), 15) + 20;
-			int h = wxMax(size.GetHeight(), 15) + 20;
+			int w = wxMax(size.GetWidth(), 15) + 25;
+			int h = wxMax(size.GetHeight(), 15) + 25;
 
 
 			wxGridCellEditor *editor = attr->GetEditor(this, row, col);
